@@ -1,5 +1,7 @@
 <template>
+  <div class="relative">
     <Header/>
       <slot />
-    <Footer/>
+    <Footer/>    
+  </div>
 </template>

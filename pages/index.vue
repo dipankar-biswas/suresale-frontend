@@ -21,7 +21,6 @@
     <!-- Regular Ads -->
     <!-- <HomeRegularAds></HomeRegularAds> -->
 
-
     <!-- Banner -->
     <BannerAds></BannerAds>
     

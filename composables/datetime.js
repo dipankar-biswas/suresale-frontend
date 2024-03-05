@@ -1,5 +1,21 @@
 export const useDateTime = () => {
+  // Pretty much every browser;
+  // 12:00 Am
+  function formatHM(date){
+    const dateToday = new Date(date);
 
+    let hr = [dateToday.getHours()% 12 || 12];
+    let min = [dateToday.getMinutes()];
+    
+    var amPm;
+    if (hr > 12){
+      amPm = "AM"
+    } else {
+      amPm = "PM"
+    }
+    
+    return hr + ":" + min + " " + amPm;
+  }
 
   function TimeFormat(date){
     const dateToday = new Date(date);
@@ -17,6 +33,8 @@ export const useDateTime = () => {
     
     return hr + ":" + min + ":" + sec + " " + amPm;
   }
+
+
 
   const DayTimeFormat = (date) => {
       const dateToday = new Date(date);
@@ -79,5 +97,5 @@ export const useDateTime = () => {
 
 
 
-  return { TimeFormat, DayTimeFormat, formatCompat, formatMDY, timeSincePosted }
+  return { formatHM, TimeFormat, DayTimeFormat, formatCompat, formatMDY, timeSincePosted }
 }

@@ -7,6 +7,27 @@
     // console.log(auth.user.id);
     // console.log(route.params.id);
 
+    const follower = ref(0);
+    const followersData = ref([]);
+    const followers = async() => {
+        refreshNuxtData();
+        const token = useTokenStore();
+        try{
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token.getToken}`,
+                        },
+                    });
+            followersData.value = data.value.data;
+            follower.value = followersData.value.length;
+        }catch(error){
+            console.log(error);
+        }
+    }
+    followers();
+
+    const following = ref(false);
     const followingsData = ref([]);
     const followings = async() => {
         refreshNuxtData();
@@ -19,10 +40,9 @@
                         },
                     });
             followingsData.value = data.value.data;
-            // console.log(data.value.data);
-            // console.log(followingsData.value.find(item => item.id === 1))
+            following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
         }catch(error){
-            console.log('Somthing Wrong!');
+            console.log(error);
         }
     }
     followings();
@@ -41,44 +61,37 @@
                         }
                     });
             console.log(data);
+            following.value = true;
         }catch(error){
-            console.log('Somthing Wrong!');
+            console.log(error);
         }
     }
 
-    const unfollow = async(id) => {
+    const unfollow = async() => {
         const token = useTokenStore();
         try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers?to=${route.params.id}`, {
                         method: 'DELETE',
                         headers: {
                             Accept: "application/json",
                             Authorization: `Bearer ${token.getToken}`,
                         },
-                        body: {
-                            to:route.params.id
-                        }
                     });
-            console.log(data);
+                    console.log(data);
+                    following.value = false;
         }catch(error){
-            console.log('Somthing Wrong!');
+            console.log(error);
         }
     }
+
 
 
     const allAds = ref([]);
     const AllAds = async() => {
         refreshNuxtData();
-        const token = useTokenStore();
         try{
-            console.log('SDGEWDF');
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/product?of=${route.params.id}`, {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-            allAds.value = data.value.data;
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`);
+            allAds.value = data.value;
         }catch(error){
             console.log('Somthing Wrong!');
         }
@@ -121,27 +134,23 @@
                     </div>
                     <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" />
                 </div>
-
+                
                 <div class="mx-auto w-full bg-whiterounded-lg dark:bg-gray-800">
                     <div class="flex">
                         <div class="w-1/4"></div>
                         <div class="w-2/4 flex flex-col items-center pb-10 -mt-14">
                             <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
-                                <img class="w-28 h-28 rounded-full p-1" src="/assets/images/avatar.png" alt="Bonnie image"/>
-                                <div data-modal-target="default-modal" data-modal-toggle="default-modal" class="absolute inline-flex items-center justify-center cursor-pointer w-8 h-8 text-xs font-bold text-white bg-gray-500 border-2 border-white rounded-full top-0 end-0 dark:border-gray-900">
-                                    <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z" clip-rule="evenodd"/>
-                                        <path fill-rule="evenodd" d="M19.8 4.3a2.1 2.1 0 0 0-1-1.1 2 2 0 0 0-2.2.4l-.6.6 2.9 3 .5-.6a2.1 2.1 0 0 0 .6-1.5c0-.2 0-.5-.2-.8Zm-2.4 4.4-2.8-3-4.8 5-.1.3-.7 3c0 .3.3.7.6.6l2.7-.6.3-.1 4.7-5Z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
+                                <img class="w-28 h-28 rounded-full p-1" v-if="allAds?.profile_picture" :src="useRuntimeConfig().public.imageUrl+allAds?.profile_picture" alt="Bonnie image"/>
+                                <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
                             </div>
-                            <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">Dipankar</h5>
+                            <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ allAds?.name }}</h5>
                             <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
-                            <span class="text-sm font-semibold dark:text-gray-400">58 Followers</span>
+                            <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
                         </div>
                         <div class="w-1/4 mt-4">
                             <div class="flex" v-if="auth.user.id">
-                                <button type="button" @click="follow(auth)" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Follow</button>
+                                <button type="button" v-if="following == false" @click="follow()" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Follow</button>
+                                <button type="button" v-else @click="unfollow()" class="text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Unfollow</button>
                                 <button type="button" class="inline-flex text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -174,8 +183,8 @@
                     </div>
                 </div>
                 <div class="p-6 bg-white dark:bg-gray-800 dark:border-gray-700">
-                    <div v-if="allAds" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
-                        <div v-for="(ads,index) in allAds" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
+                    <div v-if="allAds?.product?.data.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
+                        <div v-for="(ads,index) in allAds.product.data" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
                             <div class="relative">
                                 <nuxt-link :to="`/ads-details/${ads.id}`">
                                     <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0].replaceAll('public','storage')" alt="Ads" />
@@ -193,7 +202,9 @@
                                     </div>
                                 </div>
                                 <h4 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                    {{ ads.title }}
+                                    <nuxt-link :to="`/ads-details/${ads?.id}`">
+                                        {{ ads.title }}
+                                    </nuxt-link>
                                 </h4>
                                 <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
                                     {{ common.parseText(ads.description,80) }}

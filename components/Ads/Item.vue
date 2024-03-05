@@ -15,7 +15,7 @@ const props = defineProps(['adsItem'])
             <div class="flex justify-between">
                 <div class="left flex gap-x-3">
                     <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ props.adsItem?.currency?.symbol }}{{ props.adsItem?.price }}</h3>
-                    <h5 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">$11,300.00</h5>
+                    <!-- <h5 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">$11,300.00</h5> -->
                 </div>
                 <div class="right">
                     <span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Premium</span>

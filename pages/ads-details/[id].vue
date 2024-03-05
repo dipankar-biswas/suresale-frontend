@@ -1,4 +1,5 @@
 <script setup>
+const auth = useAuthStore();
 const route = useRoute();
 const datetime = useDateTime();
 
@@ -13,6 +14,152 @@ const AdsView = async() => {
     }
 }
 AdsView();
+
+const productId = ref(route.params.id);
+const allReviews = ref([]);
+const form = reactive({
+    rating: null,
+    comment: null,
+})
+
+
+const AllReviews = async() => {
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/product/${productId.value}`);
+        console.log(data.value.data);
+        allReviews.value = data.value.data.data;
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
+}
+AllReviews();
+
+const handelSubmit = async() => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                    body: {
+                        product_id: productId.value,
+                        rating: form.rating,
+                        comment: form.comment,
+                    },
+                });
+        console.log(data);
+        AllReviews(productId.value);
+    }catch(error){
+        console.log(error);
+    }
+}
+
+
+// Message
+const replies = ref([]);
+const replybox = ref([]);
+const reviewReplyBtn = async(id,index) => {
+    if(replybox.value[index] == true){
+        replybox.value[index] = false;
+    }else{
+        replybox.value[index] = true;
+    }
+    reviewReply(id,index);
+}
+
+const reviewReply = async(id,index) => {
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}`);
+        console.log(data.value.data.replies);
+        replies.value[index] = data.value.data.replies;
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
+}
+
+
+const toUuid = ref(null);
+const productsId = ref(null);
+const toUser = ref(null);
+const msgShowBtn = (to_uuid, product_id, form_uuid, uName, uPicture) => {
+    toUuid.value = to_uuid;
+    productsId.value = product_id;
+    console.log(to_uuid, product_id, form_uuid, uName, uPicture);
+    const touser = {
+        name:uName,
+        profile_picture:uPicture,
+        form_uuid:form_uuid,
+        product_id:product_id,
+    }
+    toUser.value = touser;
+    getMessages();
+}
+const getmessage = ref('');
+const getMessages = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=0&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
+                    method: 'GET',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        console.log(data);
+        getmessage.value = data.value.data.data.reverse();
+    }catch(error){
+        console.log(error);
+    }
+}
+
+
+
+const loadMoreMsgFun = async(id) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=${id}&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
+                    method: 'GET',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        console.log(data);
+        getmessage.value.push(...data.value.data.data);
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
+}
+
+const replyText = ref([]);
+const handelReplySubmit = async(id,index) => {
+    console.log(id, index);
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}?review_id=${auth?.user?.id}&reply=${replyText.value[index]}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            replyText.value[index] = '';
+            reviewReply(id,index);
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
+
+const chathideshow = ref(false);
+const chathideFun = async(event) => {
+    chathideshow.value = event;
+}
+
 </script>
 
 <template>    
@@ -126,25 +273,36 @@ AdsView();
                             <figcaption class="flex items-center justify-start mt-6 mb-5 space-x-3 rtl:space-x-reverse">
                                 <img class="w-12 h-12 rounded-full" v-if="adsView?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+adsView?.user?.profile_picture" alt="profile picture">
                                 <div class="">
-                                    <div class="font-medium text-gray-900 dark:text-white">{{ adsView?.user?.name }}</div>
+                                    <div class="font-medium text-gray-900 dark:text-white">
+                                        <nuxt-link :to="`/${adsView?.user?.name.replaceAll(' ','-')}/${adsView?.user?.id}/products`">{{ adsView?.user?.name }}</nuxt-link>
+                                    </div>
                                     <div class="flex gap-x-5">
                                         <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1">
-                                            <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                            <svg class="w-3 h-3 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
                                                 <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
                                             </svg>
                                             <span>5.0</span>
                                         </div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1">
-                                            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                        <div data-modal-target="reviews-modal" data-modal-toggle="reviews-modal" class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1 cursor-pointer hover:text-gray-900">
+                                            <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                                 <path fill-rule="evenodd" d="M3 6c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 1.9h-6.6l-2.9 2.7c-1 .9-2.5.2-2.5-1v-1.7H5a2 2 0 0 1-2-2V6Zm5.7 3.8a1 1 0 1 0-1.4 1.4 1 1 0 1 0 1.4-1.4Zm2.6 0a1 1 0 1 1 0 1.4 1 1 0 0 1 0-1.4Zm5.4 0a1 1 0 1 0-1.4 1.4 1 1 0 1 0 1.4-1.4Z" clip-rule="evenodd"/>
                                             </svg>
-                                            <span>6 Reviews</span>
+                                            <span>{{ allReviews.length }} Reviews</span>
                                         </div>
                                     </div>
                                 </div>
                             </figcaption>
                             <div class="actions mb-4">
-                                <button type="button" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                <button v-if="auth?.user?.id" type="button" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                    <div @click="chathideshow = true, msgShowBtn(adsView?.user?.id,  adsView?.id, adsView?.user?.id,  adsView?.user?.name,  adsView?.user?.profile_picture)" class="flex items-center gap-x-1">
+                                        <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M4 3a1 1 0 0 0-1 1v8c0 .6.4 1 1 1h1v2a1 1 0 0 0 1.7.7L9.4 13H15c.6 0 1-.4 1-1V4c0-.6-.4-1-1-1H4Z" clip-rule="evenodd"/>
+                                            <path fill-rule="evenodd" d="M8 17.2h.1l2.1-2.2H15a3 3 0 0 0 3-3V8h2c.6 0 1 .4 1 1v8c0 .6-.4 1-1 1h-1v2a1 1 0 0 1-1.7.7L14.6 18H9a1 1 0 0 1-1-.8Z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Start Chat</span>
+                                    </div>
+                                </button>
+                                <button v-else type="button" data-modal-target="start-chat-modal" data-modal-toggle="start-chat-modal" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M4 3a1 1 0 0 0-1 1v8c0 .6.4 1 1 1h1v2a1 1 0 0 0 1.7.7L9.4 13H15c.6 0 1-.4 1-1V4c0-.6-.4-1-1-1H4Z" clip-rule="evenodd"/>
@@ -411,5 +569,141 @@ AdsView();
             </div>
         </div>
     </div>
+
+
+    <!-- Main modal -->
+    <div id="reviews-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-lg max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Reviews
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="reviews-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <form @submit.prevent="handelSubmit" class="p-4 md:p-5">
+                    <div class="grid gap-4 mb-4 grid-cols-2">
+                        <div class="col-span-2">
+                            <label for="rating" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Rating</label>
+                            <input type="text" v-model="form.rating" name="rating" id="rating" min="1" max="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="5" required="">
+                        </div>
+                        <div class="col-span-2">
+                            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Review</label>
+                            <textarea id="description" v-model="form.comment" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write product review here"></textarea>                    
+                        </div>
+                    </div>
+                    <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Add Review
+                    </button>
+                </form>
+
+                
+                <!-- All Reviews -->
+                <div class="p-4">
+                    <div class="flex items-center justify-between p-2 mb-3 border-b rounded-t dark:border-gray-600">
+                        <h4 class="text-md font-semibold text-gray-900 dark:text-white"> All Reviews </h4>
+                    </div>
+                    <div v-if="allReviews.length > 0">
+                        <article v-for="(reviw, index) in allReviews" :key="reviw?.id">
+                            <div class="flex items-center mb-3">
+                                <img class="w-8 h-8 me-4 rounded-full border border-gray-300 shadow-md" v-if="reviw?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+reviw?.user?.profile_picture" alt="Bonnie image"/>
+                                <img class="w-8 h-8 me-4 rounded-full border border-gray-300 shadow-md" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
+                                <div class="leading-4 dark:text-white">
+                                    <p class="text-xs font-medium">{{ reviw?.user?.name }}</p>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">Visual Designer</span>
+                                </div>
+                            </div>
+                            <div class="flex item-center gap-x-2 mb-1">
+                                <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                    <svg class="w-3 h-3 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex item-center">
+                                    <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">4.95</p>
+                                    <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">out of</p>
+                                    <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">5</p>
+                                </div>
+                            </div>
+                            <div class="border-b border-gray-100 mb-3 pb-2">
+                                <p class="mb-2 text-sm text-gray-800 dark:text-gray-400">{{ reviw?.comment }}</p>
+                                <p @click="reviewReplyBtn(reviw?.id, index)" class="text-xs text-gray-500 "><span class="font-medium cursor-pointer me-2 hover:text-gray-800">Reply</span>{{ datetime.formatMDY(reviw?.created_at) }} {{ datetime.formatHM(reviw?.created_at) }}</p>
+                            </div>
+                            <!-- Reply -->
+                            <div v-if="auth?.user?.id && replybox[index]" class="mb-4">
+                                <form @submit.prevent="handelReplySubmit(reviw?.id,index)" class="max-w-md mx-auto px-8">   
+                                    <div class="relative">
+                                        <input type="text" v-model="replyText[index]" id="default-search" class="block w-full p-2 pe-20 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Mockups, Logos..." required />
+                                        <button type="submit" class="text-white absolute end-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-4 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" style="bottom:5px">Reply</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div  v-if="replies[index]?.length > 0 && replybox[index]" class="mt-2 ps-8">
+                                <div v-for="(reply, inde) in replies[index]" :key="reply?.id">
+                                    <div class="flex items-center mb-3">
+                                        <img class="w-8 h-8 me-4 rounded-full border border-gray-300 shadow-md" v-if="reply?.by?.profile_picture" :src="useRuntimeConfig().public.imageUrl+reply?.by?.profile_picture" alt="Bonnie image"/>
+                                        <img class="w-8 h-8 me-4 rounded-full border border-gray-300 shadow-md" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
+                                        <div class="leading-4 dark:text-white">
+                                            <p class="text-xs font-medium">{{ reply?.by?.name }}</p>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Visual Designer</span>
+                                        </div>
+                                    </div>
+                                    <div class="border-b border-gray-100 mb-2 pb-1">
+                                        <p class="text-sm text-gray-800 dark:text-gray-400">{{ reply?.reply }}</p>
+                                        <!-- <p class="text-xs text-gray-500 "><span class="font-medium cursor-pointer me-2 hover:text-gray-800">Reply</span>{{ datetime.formatMDY(reviw?.created_at) }} {{ datetime.formatHM(reviw?.created_at) }}</p> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    <div v-else>
+                        <span class="text-sm">No Reviews...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
     
+    <ChatSingle v-if="auth?.user?.id" :chathideshow="chathideshow" :toUser="toUser" :getmessage="getmessage" @chathide="chathideFun($event)" @loadmoremsgid="loadMoreMsgFun($event)"></ChatSingle>
+    
+    <div id="start-chat-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="start-chat-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+                <div class="p-4 md:p-5 text-center">
+                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Please Login First ! Try agian.</h3>
+                    <button data-modal-hide="start-chat-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>

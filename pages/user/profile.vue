@@ -35,19 +35,23 @@ const formEidt = ref(false);
 const form = reactive({
     name: null,
     email: null,
-    mobile: null,
+    mobile: auth?.user?.mobile != null ? auth?.user?.mobile : null,
     dob: null,
     gender: null,
     address: null,
     about_me: null,
 })
 const formEidtBtn = async() => {
+    console.log(form.mobile);
+    console.log(user.value?.mobile);
     formEidt.value = true;
     form.name = user.value?.name;
     form.email = user.value?.email;
-    form.mobile = user.value?.mobile;
+    if(form.mobile !== user.value?.mobile){
+        form.mobile = user.value?.mobile;
+    }
     form.dob = user.value?.profile?.dob;
-    form.gender = (user.value?.profile?.gender).toLowerCase();
+    form.gender = (user.value?.profile?.gender)?.toLowerCase();
     form.address = user.value?.profile?.address;
     form.about_me = user.value?.profile?.about_me;
 }
