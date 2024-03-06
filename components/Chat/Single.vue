@@ -171,7 +171,7 @@ const handleSubmit = async() => {
                                 <img class="w-7 h-7 rounded-full shadow-md" v-if="auth?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="Picture">
                             </div>
                             <div class="msg w-[calc(100%-32px)] flex items-end flex-col gap-y-2">
-                                <div class="txt bg-gradient-to-r from-indigo-500 to-indigo-300 text-sm text-white shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}</div>
+                                <div class="txt bg-gradient-to-r from-indigo-500 to-indigo-300 text-sm text-white shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}{{ msg?.id }}</div>
                             </div>
                         </div>
                         <div v-else class="chat left flex gap-x-3 mb-5">
@@ -179,7 +179,7 @@ const handleSubmit = async() => {
                                 <img class="w-7 h-7 rounded-full shadow-md" v-if="props.toUser?.profile_picture" :src="useRuntimeConfig().public.imageUrl+props.toUser?.profile_picture" alt="Picture">
                             </div>
                             <div class="msg w-[calc(100%-32px)] flex items-start flex-col gap-y-2">
-                                <div class="txt bg-gray-100 text-sm text-gray-500 shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}</div>
+                                <div class="txt bg-gray-100 text-sm text-gray-500 shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}{{ msg?.id }}</div>
                             </div>
                         </div>
                     </div>

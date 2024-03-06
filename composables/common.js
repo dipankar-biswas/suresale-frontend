@@ -11,7 +11,7 @@ export const useCommonFun = () => {
     }
 
 
-    let parseText = function(text, limit){
+    let parseText = function(text, limit) {
         if (text.length > limit)
             for (let i = limit; i > 0; i--){
                 if(text.charAt(i) === ' ' && (text.charAt(i-1) != ','||text.charAt(i-1) != '.'||text.charAt(i-1) != ';')) {
@@ -21,8 +21,31 @@ export const useCommonFun = () => {
         else
             return text;
     };
+
+
+    // Image Zoom
+    function imageZoom(){
+        const productImage = document?.querySelector('.imageZoom');
+
+        productImage?.addEventListener('mouseover', () => {
+            productImage.style.transform = 'scale(3)';
+        });
+    
+        productImage?.addEventListener('mouseout', () => {
+            productImage.style.transform = 'scale(1)';
+        });
+    
+        productImage?.addEventListener('mousemove', (e) => {
+            const { offsetX, offsetY, target } = e;
+            const { offsetWidth: width, offsetHeight: height } = target;
+            const x = (offsetX / width) * 100;
+            const y = (offsetY / height) * 100;
+        
+            return productImage.style.transformOrigin = `${x}% ${y}%`;
+        });
+    }
   
-    return { convertToSlug, parseText }
+    return { convertToSlug, parseText, imageZoom }
   }
 
   

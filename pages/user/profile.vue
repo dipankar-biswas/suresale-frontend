@@ -17,6 +17,28 @@ const success_msg1 = ref(null);
 const success_msg2 = ref(null);
 
 
+// Follower
+const follower = ref(0);
+const followersData = ref([]);
+const followers = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        followersData.value = data.value.data;
+        follower.value = followersData.value.length;
+    }catch(error){
+        console.log(error);
+    }
+}
+followers();
+
+
 // Get User Data
 const refreshAll = async() =>{
     refreshNuxtData();
@@ -151,7 +173,7 @@ const profilePicUpdateBtn = async() => {
                             </div>
                             <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="user?.name">{{ user.name }}</h5>
                             <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
-                            <span class="text-md font-semibold dark:text-gray-400">58 Followers</span>
+                            <span class="text-md font-semibold dark:text-gray-400">{{ follower }} Followers</span>
                         </div>
                     </div>
 

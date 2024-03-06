@@ -6,6 +6,7 @@ const listgrid = ref(1);
 // Bookmark
 const bookmarks = ref([]);
 const MyBookmarks = async() => {
+    refreshNuxtData();
     const token = useTokenStore();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark`,{

@@ -3,12 +3,32 @@ const auth = useAuthStore();
 const route = useRoute();
 const datetime = useDateTime();
 
+
+function normalizeAndReverseArray(arr) {
+  // Step 1: Reverse the array
+  const reversedArray = arr.reverse();
+
+  // Step 2: Find the minimum and maximum values
+  const minValue = Math.min(...reversedArray);
+  const maxValue = Math.max(...reversedArray);
+
+  // Step 3: Normalize the values
+  const normalizedArray = reversedArray.map(value => {
+    const normalizedValue = (value - minValue) / (maxValue - minValue);
+    return normalizedValue;
+  });
+
+  return normalizedArray;
+}
+
 const adsView = ref([]);
+const showImage = ref();
 const AdsView = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/view-product/${route.params.id}`);
         adsView.value = data.value.product;
+        showImage.value = adsView.value?.picture[0];
     }catch(error){
         console.log('Somthing Wrong!');
     }
@@ -108,8 +128,7 @@ const getMessages = async() => {
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        console.log(data);
-        getmessage.value = data.value.data.data.reverse();
+        getmessage.value = [...data.value.data.data].reverse();
     }catch(error){
         console.log(error);
     }
@@ -127,7 +146,9 @@ const loadMoreMsgFun = async(id) => {
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        console.log(data);
+        normalizeAndReverseArray(getmessage.value);
+        console.log(getmessage.value);
+        console.log(data.value.data.data);
         getmessage.value.push(...data.value.data.data);
     }catch(error){
         console.log('Somthing Wrong!');
@@ -160,8 +181,40 @@ const chathideFun = async(event) => {
     chathideshow.value = event;
 }
 
-</script>
 
+const zoomScale = ref(1);
+const zoomMove = ref({ x: 0, y: 0 });
+const imageMouseOver = (e) => {
+    console.log('Ok')
+    const { offsetX, offsetY, target } = e;
+    const { offsetWidth: width, offsetHeight: height } = target;
+    const x = (offsetX / width) * 100;
+    const y = (offsetY / height) * 100;
+
+    zoomMove.value = { x, y };
+}
+const imageMouseLeave = () => {
+    console.log('Oks')
+    zoomScale.value = 1;
+    zoomMove.value = { x: 0, y: 0 };
+}
+</script>
+<style>
+.zoomable-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease-out;
+}
+
+/* Custom directive for zooming */
+.v-zoomable-enter-active, .v-zoomable-leave-active {
+  transition: transform 0.3s ease-out;
+}
+
+.v-zoomable-enter, .v-zoomable-leave-to {
+  transform: scale(1);
+}
+</style>
 <template>    
     <div class="max-w-screen-2xl mx-auto px-4 py-9">
         <nav class="flex" aria-label="Breadcrumb">
@@ -200,14 +253,14 @@ const chathideFun = async(event) => {
                         
                         <div class="w-9/12">
                             <div class="feature-image">
-                                <img class="rounded-lg w-full h-auto object-cover" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+adsView?.picture[0].replaceAll('public','storage')" alt="Ads" />
-                                <img class="rounded-lg w-full h-auto object-cover" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
+                                <img class="rounded-lg w-full h-auto object-cover ease-out zoomable-image" @mouseover="imageMouseOver" @mouseleave="imageMouseLeave" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" />
+                                <img class="rounded-lg w-full h-auto object-cover ease-out" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
                             </div>
                         </div>
                         <div class="w-3/12">
                             <div class="slides flex flex-col gap-y-3">
                                 <div v-for="(image,index) in adsView?.picture" :key="index" class="item border border-cyan-500 rounded-lg">
-                                    <img class="rounded-lg h-28 object-cover" :src="useRuntimeConfig().public.imageUrl+'/'+image.replaceAll('public','storage')" alt="Ads" />
+                                    <img class="rounded-lg w-full h-28 object-cover" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image.replaceAll('public','storage')" alt="Ads" />
                                 </div>
                             </div>
                         </div>

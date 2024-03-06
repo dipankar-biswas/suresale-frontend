@@ -3,25 +3,82 @@ const route = useRoute();
 const datetime = useDateTime();
 const common = useCommonFun();
 
-
-// const form = reactive({
-//     category: '',
-//     searchText: '',
-//     location: '',
-// })
-// const categories = ref([]);
-// const getCetagories = async() => {
-//     refreshNuxtData();
-//     try{
-//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-//         categories.value = data.value.categories;
-//     }catch(error){
-//         console.log('Somthing Wrong!');
-//     }
-// }
-// getCetagories();
+const priceFilterFun = (event) => {
+    getSearchDatas(event,'price');
+}
+const adsCheckData = ref();
+const adsCheckedFun = (event) => {
+    adsCheckData.value = event
+}
+const catCheckData = ref();
+const catCheckedFun = (event) => {
+    catCheckData.value = event
+}
+const condCheckData = ref();
+const condCheckedFun = (event) => {
+    condCheckData.value = event
+}
+const stateCheckData = ref();
+const stateCheckedFun = (event) => {
+    stateCheckData.value = event
+}
 
 const searchDatas = ref([]);
+const getSearchDatas = async(value, action) => {
+    let obj;
+    if(action == 'price'){
+        obj = { price:[value.value.min,value.value.max] }
+    }else if(action == 'type'){
+        obj = { type:value }
+    }else if(action == 'category'){
+        obj = { category:value }
+    }else if(action == 'condition'){
+        obj = { condition:value }
+    }else if(action == 'location'){
+        obj = { location:value }
+    }
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/filter`,{
+            method: 'POST',
+            body: obj
+        });
+        searchDatas.value = data.value.data;
+    }catch(error){
+        console.log(error);
+    }
+}
+
+watch(() => adsCheckData.value, async (currentValue) => {
+    if(currentValue.value.length > 0){
+        getSearchDatas(adsCheckData.value,'type');
+    }
+  },
+  {deep: true}
+);
+watch(() => catCheckData.value, async (currentValue) => {
+    if(currentValue.value.length > 0){
+        getSearchDatas(catCheckData.value,'category');
+    }
+  },
+  {deep: true}
+);
+watch(() => condCheckData.value, async (currentValue) => {
+    if(currentValue.value.length > 0){
+        getSearchDatas(condCheckData.value,'condition');
+    }
+  },
+  {deep: true}
+);
+watch(() => stateCheckData.value, async (currentValue) => {
+    if(currentValue.value.length > 0){
+        getSearchDatas(stateCheckData.value,'location');
+    }
+  },
+  {deep: true}
+);
+
+
+
 const getSearchData = async() => {
     refreshNuxtData();
     try{
@@ -52,12 +109,12 @@ const loadMoreBtn = async() => {
 <template>
     <div class="content">
         <div class="max-w-screen-2xl block lg:flex justify-between gap-x-4 h-full mx-auto px-4">
-          
-            <Sidebar></Sidebar>
+
+            <Sidebar @priceFilter="priceFilterFun" @catChecked="catCheckedFun($event)" @condChecked="condCheckedFun($event)" @stateChecked="stateCheckedFun($event)" @adsChecked="adsCheckedFun($event)"></Sidebar>
 
             <div class="lg:w-[calc(100%-16rem)]">
                 <div class="py-6">
-                    <nav class="flex" aria-label="Breadcrumb">
+                    <nav class="flex mb-3" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                             <li class="inline-flex items-center">
                                 <a href="#" class="inline-flex items-center text-xs font-normal text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
@@ -94,7 +151,7 @@ const loadMoreBtn = async() => {
                     </button>
                     
                     <!-- Categories -->
-                    <div class="mx-auto w-full max-w-screen-2xl px-4">
+                    <!-- <div class="mx-auto w-full max-w-screen-2xl px-4">
                         <div class="bg-white">
                             <div class="title flex items-center gap-3 px-3 py-3 border-b-2 mb-4">
                                 <h4 class="text-xl font-semibold">Shop by Categories</h4>
@@ -114,7 +171,7 @@ const loadMoreBtn = async() => {
                                 <a href="#" class="py-2.5 px-5 me-2 mb-2 text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Search Item</a>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 
 
                     <!-- Ads -->
