@@ -2,6 +2,8 @@
   <div class="relative">
     <Header/>
       <slot />
-    <Footer/>    
+    <Footer/>  
+    
+    <ToasterAlert></ToasterAlert>
   </div>
 </template>

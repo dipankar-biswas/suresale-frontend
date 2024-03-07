@@ -216,6 +216,25 @@ const handelSubmit = async() => {
 }
 
 
+
+const xBy = ref(0);
+const yBy = ref(0);
+const transformScale = ref(1);
+const imageMouseEnter = () => {
+    transformScale.value = 2.5;
+}
+const imageMouseLeave = () => {
+    transformScale.value = 1;
+}
+const imageMouseMove = (e) => {
+    const { offsetX, offsetY, target, } = e;
+    const { offsetWidth: width, offsetHeight: height } = target;
+    const x = (offsetX / width) * 100;
+    const y = (offsetY / height) * 100;
+    
+    xBy.value = `${x}%`;
+    yBy.value = `${y}%`;
+}
 </script>
 <template>
     <div class="content">
@@ -273,11 +292,11 @@ const handelSubmit = async() => {
                                     @change="categoryFields(form.category)"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                     <option disabled value="null">Category</option>
-                                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                                    <option v-for="(cat,index) in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                                 </select>
                             </div>
                             <div v-if="fields.length > 0">
-                                <div class="mb-2" v-for="field in fields" :key="field.id">
+                                <div class="mb-2" v-for="(field,index) in fields" :key="field.id">
                                     <input type="text" :name="field.name" v-model="form.fields.key1[index].value" id="default-input" :placeholder="field.name[0]?.toUpperCase() + field.name?.slice(1)"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 </div>
@@ -361,8 +380,8 @@ const handelSubmit = async() => {
 
                             <div v-else class="mx-auto w-full max-w-1/2">
                                 <div class="grid gap-4">
-                                    <div>
-                                        <img class="h-auto max-w-full rounded-lg" :src="showImage" alt="Image">
+                                    <div class="rounded-lg overflow-hidden">
+                                        <img class="h-auto max-w-full rounded-lg transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" :src="showImage" alt="Image"  :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
                                     </div>
                                     <div class="grid grid-cols-5 gap-4">
                                         <div v-for="(slide,index) in galleryData" :key="index">

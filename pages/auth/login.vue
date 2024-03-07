@@ -1,4 +1,5 @@
 <script setup>
+const toaster = useToasterStore();
 const auth = useAuthStore();
 definePageMeta({
   middleware: ["guest"]
@@ -16,6 +17,7 @@ const handleSubmit = async() => {
         await auth.login(form);
         loadbtn.value = false;
     }catch(error){
+        toaster.addWrong();
         errors.value = error.data.errors;
         loadbtn.value = false;
     }

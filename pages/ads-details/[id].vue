@@ -182,39 +182,26 @@ const chathideFun = async(event) => {
 }
 
 
-const zoomScale = ref(1);
-const zoomMove = ref({ x: 0, y: 0 });
-const imageMouseOver = (e) => {
-    console.log('Ok')
-    const { offsetX, offsetY, target } = e;
+const xBy = ref(0);
+const yBy = ref(0);
+const transformScale = ref(1);
+const imageMouseEnter = () => {
+    transformScale.value = 2.5;
+}
+const imageMouseLeave = () => {
+    transformScale.value = 1;
+}
+const imageMouseMove = (e) => {
+    const { offsetX, offsetY, target, } = e;
     const { offsetWidth: width, offsetHeight: height } = target;
     const x = (offsetX / width) * 100;
     const y = (offsetY / height) * 100;
+    
+    xBy.value = `${x}%`;
+    yBy.value = `${y}%`;
+}
 
-    zoomMove.value = { x, y };
-}
-const imageMouseLeave = () => {
-    console.log('Oks')
-    zoomScale.value = 1;
-    zoomMove.value = { x: 0, y: 0 };
-}
 </script>
-<style>
-.zoomable-image {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s ease-out;
-}
-
-/* Custom directive for zooming */
-.v-zoomable-enter-active, .v-zoomable-leave-active {
-  transition: transform 0.3s ease-out;
-}
-
-.v-zoomable-enter, .v-zoomable-leave-to {
-  transform: scale(1);
-}
-</style>
 <template>    
     <div class="max-w-screen-2xl mx-auto px-4 py-9">
         <nav class="flex" aria-label="Breadcrumb">
@@ -252,9 +239,9 @@ const imageMouseLeave = () => {
                     <div class="w-full flex gap-x-4">
                         
                         <div class="w-9/12">
-                            <div class="feature-image">
-                                <img class="rounded-lg w-full h-auto object-cover ease-out zoomable-image" @mouseover="imageMouseOver" @mouseleave="imageMouseLeave" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" />
-                                <img class="rounded-lg w-full h-auto object-cover ease-out" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
+                            <div class="feature-image overflow-hidden rounded-lg">
+                                <img class="rounded-lg w-full h-auto object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                <img class="rounded-lg w-full h-auto object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-else src="assets/images/dummy-image.jpg" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
                             </div>
                         </div>
                         <div class="w-3/12">
