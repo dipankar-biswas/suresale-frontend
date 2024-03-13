@@ -1,11 +1,17 @@
 <script setup>
+    useSeoMeta({
+        title: 'My Products - My Amazing Site',
+        ogTitle: 'My Amazing Site',
+        description: 'This is my amazing site, let me tell you all about it.',
+        ogDescription: 'This is my amazing site, let me tell you all about it.',
+        ogImage: 'image',
+        twitterCard: 'image',
+    })
     const auth = useAuthStore();
     const route = useRoute();
     const datetime = useDateTime();
     const common = useCommonFun();
     const listgrid = ref(2);
-    // console.log(auth.user.id);
-    // console.log(route.params.id);
 
     const follower = ref(0);
     const followersData = ref([]);
@@ -87,11 +93,19 @@
 
 
     const allAds = ref([]);
+    const allAdsList = ref([]);
     const AllAds = async() => {
         refreshNuxtData();
+        const token = useTokenStore();
         try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`);
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`,{
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token.getToken}`,
+                },
+            });
             allAds.value = data.value;
+            allAdsList.value = data.value?.product?.data;
         }catch(error){
             console.log('Somthing Wrong!');
         }
@@ -111,6 +125,45 @@
         }catch(error){
             console.log('Somthing Wrong!');
             loadbtn.value = false;
+        }
+    }
+
+
+    
+    // Bookmark
+    const bookmarkAdd = async(id,index) => {
+        const token = useTokenStore();
+        try{
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token.getToken}`,
+                        },
+                    });
+            if(data){
+                allAdsList.value[index].is_bookmarked = 1;
+            }
+        }catch(error){
+            console.log('Somthing Wrong!');
+        }
+    }
+
+    const bookmarkRemove = async(id,index) => {
+        const token = useTokenStore();
+        try{
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token.getToken}`,
+                        },
+                    });
+            if(data){
+                allAdsList.value[index].is_bookmarked = 0;
+            }
+        }catch(error){
+            console.log('Somthing Wrong!');
         }
     }
 </script>
@@ -183,11 +236,11 @@
                     </div>
                 </div>
                 <div class="p-6 bg-white dark:bg-gray-800 dark:border-gray-700">
-                    <div v-if="allAds?.product?.data.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
-                        <div v-for="(ads,index) in allAds.product.data" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
+                    <div v-if="allAdsList?.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
+                        <div v-for="(ads,index) in allAdsList" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
                             <div class="relative">
                                 <nuxt-link :to="`/ads-details/${ads.id}`">
-                                    <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0].replaceAll('public','storage')" alt="Ads" />
+                                    <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0]?.replaceAll('public','storage')" alt="Ads" />
                                     <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
                                 </nuxt-link>
                             </div>
@@ -210,7 +263,17 @@
                                     {{ common.parseText(ads.description,80) }}
                                 </h5>
                                 <div class="flex justify-between">
-                                    <p class="text-sm">{{ datetime.formatCompat(ads.created_at) }}</p>
+                                    <p class="text-sm">
+                                        {{ datetime.formatCompat(ads.created_at) }}
+                                    </p>
+                                    <div v-if="auth?.user?.id != ads?.user_id">
+                                        <svg v-if="ads?.is_bookmarked == 1" @click="bookmarkRemove(ads?.id,index)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                                        </svg>
+                                        <svg v-else @click="bookmarkAdd(ads?.id,index)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>

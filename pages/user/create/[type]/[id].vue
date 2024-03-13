@@ -1,4 +1,16 @@
 <script setup>
+definePageMeta({
+  middleware: ["auth"]
+})
+useSeoMeta({
+  title: 'Ads Create - My Amazing Site',
+  ogTitle: 'My Amazing Site',
+  description: 'This is my amazing site, let me tell you all about it.',
+  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  ogImage: 'image',
+  twitterCard: 'image',
+})
+
 const auth = useAuthStore();
 const route = useRoute();
 
@@ -22,25 +34,12 @@ const form = reactive({
 })
 
 
-const categories = ref([]);
-const getCetagories = async() => {
-    refreshNuxtData();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.id}`);
-        categories.value = data.value.data;
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-getCetagories();
-
 const fields = ref([]);
-const categoryFields = async(id) => {
-    console.log(id);
+const categoryFields = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/${id}`,{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/${route.params.id}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
@@ -60,6 +59,7 @@ const categoryFields = async(id) => {
         console.log('Somthing Wrong!');
     }
 }
+categoryFields();
 
 
 const conditions = ref([]);
@@ -73,8 +73,6 @@ const getConditions = async() => {
     }
 }
 getConditions();
-
-
 
 
 const galleryData = ref([]);
@@ -171,11 +169,11 @@ const handelSubmit = async() => {
     }
 
     let formdata = new FormData();
-    formdata.append("type_id", route.params.id);
+    formdata.append("type_id", route.params.type);
     formdata.append("title", form.title);
     formdata.append("price", form.price);
     formdata.append("description", form.description);
-    formdata.append("category_id", form.category);
+    formdata.append("category_id", route.params.id);
     formdata.append("stock_amount", form.stock);
     formdata.append("condition_id", form.condition);
     formdata.append("location", form.location);
@@ -235,6 +233,8 @@ const imageMouseMove = (e) => {
     xBy.value = `${x}%`;
     yBy.value = `${y}%`;
 }
+
+
 </script>
 <template>
     <div class="content">
@@ -286,16 +286,7 @@ const imageMouseMove = (e) => {
                                     <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Price navigation</span>
                                 </label>
                             </div>
-                            <div class="mb-3">
-                                <select id="categories"
-                                    v-model="form.category"
-                                    @change="categoryFields(form.category)"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option disabled value="null">Category</option>
-                                    <option v-for="(cat,index) in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                                </select>
-                            </div>
-                            <div v-if="fields.length > 0">
+                            <div>
                                 <div class="mb-2" v-for="(field,index) in fields" :key="field.id">
                                     <input type="text" :name="field.name" v-model="form.fields.key1[index].value" id="default-input" :placeholder="field.name[0]?.toUpperCase() + field.name?.slice(1)"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">

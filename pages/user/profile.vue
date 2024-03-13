@@ -1,20 +1,34 @@
 <script setup>
+definePageMeta({
+  middleware: ["auth"]
+})
+useSeoMeta({
+  title: 'My Profile - My Amazing Site',
+  ogTitle: 'My Amazing Site',
+  description: 'This is my amazing site, let me tell you all about it.',
+  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  ogImage: 'image',
+  twitterCard: 'image',
+})
+
 const auth = useAuthStore();
 definePageMeta({
   middleware: ["auth"]
 })
 
 
-const user = ref([]);
 const errors = ref([]);
 const errors1 = ref([]);
 const errors2 = ref([]);
+const errors3 = ref([]);
 const loadbtn = ref(false);
 const loadbtn1 = ref(false);
 const loadbtn2 = ref(false);
+const loadbtn3 = ref(false);
 const success_msg = ref(null);
 const success_msg1 = ref(null);
 const success_msg2 = ref(null);
+const success_msg3 = ref(null);
 
 
 // Follower
@@ -39,54 +53,34 @@ const followers = async() => {
 followers();
 
 
-// Get User Data
-const refreshAll = async() =>{
-    refreshNuxtData();
-    try{
-        const data = await auth.getUserData();
-        user.value = data;
-    }catch(error){
-        errors.value = error.data.errors;
-    }
-}
-refreshAll();
-
-
 // Update User Info
 const formEidt = ref(false);
 const form = reactive({
-    name: null,
-    email: null,
-    mobile: auth?.user?.mobile != null ? auth?.user?.mobile : null,
-    dob: null,
-    gender: null,
-    address: null,
-    about_me: null,
+    name: auth?.user ? auth?.user?.name : null,
+    email: auth?.user ? auth?.user?.email : null,
+    mobile: auth?.user ? auth?.user?.mobile : null,
+    mobiles: auth?.user ? auth?.user?.mobiles : null,
+    dob: auth?.user ? auth?.user?.dob : null,
+    gender: auth?.user ? auth?.user?.gender : null,
+    address: auth?.user ? auth?.user?.address : null,
+    about_me: auth?.user ? auth?.user?.about_me : null,
 })
 const formEidtBtn = async() => {
-    console.log(form.mobile);
-    console.log(user.value?.mobile);
     formEidt.value = true;
-    form.name = user.value?.name;
-    form.email = user.value?.email;
-    if(form.mobile !== user.value?.mobile){
-        form.mobile = user.value?.mobile;
-    }
-    form.dob = user.value?.profile?.dob;
-    form.gender = (user.value?.profile?.gender)?.toLowerCase();
-    form.address = user.value?.profile?.address;
-    form.about_me = user.value?.profile?.about_me;
 }
 const updateUser = async() => {
+    if(form.mobile === auth?.user?.mobile){
+        form.mobiles = auth?.user?.mobile;
+        delete form.mobile;
+    }
     loadbtn.value = true;
     try{
         await auth.updateUserData(form);
         loadbtn.value = false;
-        await refreshAll();
         formEidt.value = false;
     }catch(error){
-        errors.value = error.data.errors;
         loadbtn.value = false;
+        errors.value = error.data.errors;
     }
 }
 
@@ -115,14 +109,14 @@ const uploadedFile = ref([]);
 const handleFileSelection = async( event ) => {
     uploadedFile.value = event.target.files[0];
     displayImage.value = URL.createObjectURL(event.target.files[0]);
-
-    const formDatas = new FormData();
-    formDatas.append('profile_picture', event.target.files[0]);
-    const data = await auth.profilePictureUpdate(formDatas);
 }
 
 const profilePicUpdateBtn = async() => {
     loadbtn2.value = true;
+
+    const formDatas = new FormData();
+    formDatas.append('profile_picture', uploadedFile.value);
+
     try{
         const data = await auth.profilePictureUpdate(formDatas);
         loadbtn2.value = false;
@@ -130,6 +124,20 @@ const profilePicUpdateBtn = async() => {
     }catch(error){
         errors2.value = error.data.errors;
         loadbtn2.value = false;
+    }
+}
+
+
+// Account Switch
+const Business = async() => {
+    loadbtn3.value = true;
+    try{
+        const data = await auth.AccountSwitch();
+        loadbtn3.value = false;
+        success_msg3.value = data.message;
+    }catch(error){
+        errors3.value = error.data.errors;
+        loadbtn3.value = false;
     }
 }
 
@@ -159,21 +167,24 @@ const profilePicUpdateBtn = async() => {
                         <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" />
                     </div>
 
-                    <div class="mx-auto w-full -mt-14 max-w-sm bg-whiterounded-lg dark:bg-gray-800">
-                        <div class="flex flex-col items-center pb-10">
-                            <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
-                                <img class="w-28 h-28 rounded-full p-1" v-if="user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+user.profile_picture" alt="Bonnie image"/>
-                                <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
-                                <div data-modal-target="default-modal" data-modal-toggle="default-modal" class="absolute inline-flex items-center justify-center cursor-pointer w-8 h-8 text-xs font-bold text-white bg-gray-500 border-2 border-white rounded-full top-0 end-0 dark:border-gray-900">
-                                    <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z" clip-rule="evenodd"/>
-                                        <path fill-rule="evenodd" d="M19.8 4.3a2.1 2.1 0 0 0-1-1.1 2 2 0 0 0-2.2.4l-.6.6 2.9 3 .5-.6a2.1 2.1 0 0 0 .6-1.5c0-.2 0-.5-.2-.8Zm-2.4 4.4-2.8-3-4.8 5-.1.3-.7 3c0 .3.3.7.6.6l2.7-.6.3-.1 4.7-5Z" clip-rule="evenodd"/>
-                                    </svg>
+                    <div class="mx-auto w-full bg-whiterounded-lg dark:bg-gray-800">
+                        <div class="flex">
+                            <div class="w-1/4"></div>
+                            <div class="w-2/4 flex flex-col items-center pb-10 -mt-14">
+                                <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
+                                    <img class="w-28 h-28 rounded-full p-1" v-if="auth?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="image"/>
+                                    <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="image"/>
+                                </div>
+                                <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="auth?.user?.name">{{ auth?.user?.name }}</h5>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
+                                <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
+                            </div>
+                            <div class="w-1/4 mt-4">
+                                <div class="flex" v-if="auth?.user?.id">
+                                    <button type="button" @click="Business" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button>
+                                    <!-- <button type="button" class="text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Business</button> -->
                                 </div>
                             </div>
-                            <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="user?.name">{{ user.name }}</h5>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
-                            <span class="text-md font-semibold dark:text-gray-400">{{ follower }} Followers</span>
                         </div>
                     </div>
 
@@ -189,33 +200,33 @@ const profilePicUpdateBtn = async() => {
                                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-4">
                                     <div class="mb-3">
                                         <FormLabel for="name">Name</FormLabel>
-                                        <FormInput type="name" name="name" id="name" placeholder="Your name" v-model="form.name"/>
+                                        <FormInput type="name" name="name" id="name" placeholder="Your name" v-if="auth?.user" v-model="form.name"/>
                                         <span v-if="errors.name" class="text-sm text-red-500">{{ errors.name[0] }}</span>
                                     </div>
                                     <div class="mb-3">
                                         <FormLabel for="email">Email</FormLabel>
-                                        <FormInput type="email" name="email" class="cursor-not-allowed" id="disabled-input" aria-label="disabled input" placeholder="name@gmail.com" v-model="form.email" disabled/>
+                                        <FormInput type="email" name="email" class="cursor-not-allowed" id="disabled-input" aria-label="disabled input" placeholder="name@gmail.com" v-if="auth?.user" v-model="form.email" disabled/>
                                         <span v-if="errors.email" class="text-sm text-red-500">{{ errors.email[0] }}</span>
                                     </div>
                                     <div class="mb-3">
                                         <FormLabel for="mobile">Phone</FormLabel>
-                                        <FormInput type="text" name="mobile" id="mobile" placeholder="0174*******" v-model="form.mobile"/>
+                                        <FormInput type="text" name="mobile" id="mobile" :placeholder="form.mobiles !== null ? form.mobiles : '0174*******'" v-if="auth?.user" v-model="form.mobile"/>
                                         <span v-if="errors.mobile" class="text-sm text-red-500">{{ errors.mobile[0] }}</span>
                                     </div>
                                     <div class="mb-3">
                                         <FormLabel for="dob">Birthday</FormLabel>
-                                        <FormInput type="text" name="dob" id="dob" placeholder="2020-02-25" v-model="form.dob"/>
+                                        <FormInput type="text" name="dob" id="dob" placeholder="2020-02-25" v-if="auth?.user" v-model="form.dob"/>
                                         <span v-if="errors.dob" class="text-sm text-red-500">{{ errors.dob[0] }}</span>
                                     </div>
                                     <div class="mb-3">
                                         <FormLabel for="gender">Gender</FormLabel>
-                                        <FormInput type="text" name="gender" id="gender" placeholder="Male" v-model="form.gender"/>
+                                        <FormInput type="text" name="gender" id="gender" placeholder="Male" v-if="auth?.user" v-model="form.gender"/>
                                         <span v-if="errors.gender" class="text-sm text-red-500">{{ errors.gender[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <FormLabel for="address">Address</FormLabel>
-                                    <FormInput type="text" name="address" id="address" placeholder="271-Moghbazar, Dhaka" v-model="form.address"/>
+                                    <FormInput type="text" name="address" id="address" placeholder="271-Moghbazar, Dhaka" v-if="auth?.user" v-model="form.address"/>
                                     <span v-if="errors.address" class="text-sm text-red-500">{{ errors.address[0] }}</span>
                                 </div>
                                 <div class="mb-3">
@@ -246,31 +257,31 @@ const profilePicUpdateBtn = async() => {
                         <div v-else>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Name : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.name">{{ user.name }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user">{{ auth?.user?.name }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Email : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.email">{{ user.email }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user">{{ auth?.user?.email }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Phone : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.mobile">{{ user.mobile }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user">{{ auth?.user?.mobile }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Birthday : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.profile?.dob">{{ user.profile.dob }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user?.profile">{{ auth?.user?.profile.dob }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Gender : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.profile?.gender">{{ user.profile.gender }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user?.profile">{{ auth?.user?.profile.gender }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">Address : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.profile?.address">{{ user.profile.address }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user?.profile">{{ auth?.user?.profile.address }}</span>
                             </div>
                             <div class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex items-start">
                                 <span class="w-40 font-semibold">About Me : </span> 
-                                <span class="w-[calc(100%-10rem)]" v-if="user?.profile?.about_me">{{ user.profile.about_me }}</span>
+                                <span class="w-[calc(100%-10rem)]" v-if="auth?.user?.profile">{{ auth?.user?.profile.about_me }}</span>
                             </div>
                         </div>
                     </div>

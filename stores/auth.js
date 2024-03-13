@@ -110,8 +110,7 @@ export const useAuthStore = defineStore('auth', {
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-
-                return data;
+                this.user = data;
             }catch(error){
                 throw error;
             }
@@ -136,7 +135,7 @@ export const useAuthStore = defineStore('auth', {
                         about_me:formData.about_me,
                     }
                 });
-
+                this.getUserData();
                 return data;
             }catch(error){
                 throw error;
@@ -178,11 +177,27 @@ export const useAuthStore = defineStore('auth', {
                     },
                     body: formData
                 });
-
+                this.getUserData();
                 return data;
             }catch(error){
                 throw error;
             }
         },
+
+        async AccountSwitch(){
+            const token = useTokenStore();
+            try{
+                const data = await $fetch(`${useRuntimeConfig().public.baseUrl}/business-apply`, {
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+                this.getUserData();
+                return data;
+            }catch(error){
+                throw error;
+            }
+        }
     },
 })

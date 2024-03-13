@@ -1,4 +1,15 @@
 <script setup>
+    definePageMeta({
+    middleware: ["auth"]
+    })
+    useSeoMeta({
+        title: 'Chat Messages - My Amazing Site',
+        ogTitle: 'My Amazing Site',
+        description: 'This is my amazing site, let me tell you all about it.',
+        ogDescription: 'This is my amazing site, let me tell you all about it.',
+        ogImage: 'image',
+        twitterCard: 'image',
+    })
     const auth = useAuthStore();
     definePageMeta({
     middleware: ["auth"]
@@ -24,13 +35,11 @@
                             Authorization: `Bearer ${token.getToken}`,
                         },
                     });
-            console.log(data);
             chatLists.value = data.value.data.data;
         }catch(error){
             console.log(error);
         }
     }
-    getChatList();
 
 
     const toUuid = ref(null);
@@ -39,7 +48,6 @@
     const msgShowBtn = (to_uuid, product_id, form_uuid, uName, uPicture) => {
         toUuid.value = to_uuid;
         productId.value = product_id;
-        console.log(to_uuid, product_id);
         const touser = {
             name:uName,
             profile_picture:uPicture,
@@ -61,13 +69,23 @@
                             Authorization: `Bearer ${token.getToken}`,
                         },
                     });
-            console.log(data);
             getmessage.value = data.value.data.data;
-            console.log(getmessage.value);
         }catch(error){
             console.log(error);
         }
     }
+    onMounted(async () => {
+        
+        setInterval(function () {
+            getChatList();
+        }, 180000);
+        
+        if(getmessage.value.length > 0){
+            setInterval(function () {
+                getMessages();
+            }, 300000);
+        }
+    });
 </script>
 <template>    
     <div class="content">

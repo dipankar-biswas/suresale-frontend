@@ -1,4 +1,13 @@
 <script setup>
+useSeoMeta({
+  title: 'Register - My Amazing Site',
+  ogTitle: 'My Amazing Site',
+  description: 'This is my amazing site, let me tell you all about it.',
+  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  ogImage: 'image',
+  twitterCard: 'image',
+})
+
 const auth = useAuthStore();
 definePageMeta({
   middleware: ["guest"]

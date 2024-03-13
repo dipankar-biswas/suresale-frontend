@@ -1,7 +1,10 @@
 <script setup>
+import { Modal } from 'flowbite';
+
 const auth = useAuthStore();
 const route = useRoute();
 const datetime = useDateTime();
+const common = useCommonFun();
 
 
 function normalizeAndReverseArray(arr) {
@@ -22,19 +25,43 @@ function normalizeAndReverseArray(arr) {
 }
 
 const adsView = ref([]);
+const adsSuggestion = ref([]);
 const showImage = ref();
 const AdsView = async() => {
     refreshNuxtData();
+    const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/view-product/${route.params.id}`);
-        adsView.value = data.value.product;
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/view-product/${route.params.id}`,{
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token.getToken}`,
+            },
+        });
+        adsView.value = data.value?.product;
+        adsSuggestion.value = data.value?.suggestion?.data;
         showImage.value = adsView.value?.picture[0];
+
+        if(adsView.value){
+            useSeoMeta({
+                title: `${adsView.value?.title ? adsView.value?.title : 'Product View - My Amazing Site'}`,
+                ogTitle: 'My Amazing Site',
+                description: 'This is my amazing site, let me tell you all about it.',
+                ogDescription: 'This is my amazing site, let me tell you all about it.',
+                ogImage: 'image',
+                twitterCard: 'image',
+            })
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }
 }
 AdsView();
 
+
+
+
+// Review
+const reviewsendckeck = ref();
 const productId = ref(route.params.id);
 const allReviews = ref([]);
 const form = reactive({
@@ -46,8 +73,8 @@ const form = reactive({
 const AllReviews = async() => {
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/product/${productId.value}`);
-        console.log(data.value.data);
         allReviews.value = data.value.data.data;
+        reviewsendckeck.value = allReviews.value.find(item => item?.user?.id === auth?.user?.id);
     }catch(error){
         console.log('Somthing Wrong!');
     }
@@ -134,8 +161,6 @@ const getMessages = async() => {
     }
 }
 
-
-
 const loadMoreMsgFun = async(id) => {
     const token = useTokenStore();
     try{
@@ -182,6 +207,7 @@ const chathideFun = async(event) => {
 }
 
 
+// Product Zoom
 const xBy = ref(0);
 const yBy = ref(0);
 const transformScale = ref(1);
@@ -199,6 +225,85 @@ const imageMouseMove = (e) => {
     
     xBy.value = `${x}%`;
     yBy.value = `${y}%`;
+}
+
+
+
+// Rating ratingnum
+const ratingPoint = ref(5);
+const ratingnum = ref(0);
+const ratingnumFun = (num) => {
+    ratingnum.value = num + 1;
+    form.rating = ratingnum.value;
+}
+
+// Report 
+const report = reactive({
+    subject: null,
+    desc: null,
+})
+const handelReportSubmit = async() => {
+    const modal = new Modal(document.getElementById('report-modal'), null);
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                    body: {
+                        product_id: productId.value,
+                        subject: report.subject,
+                        desc: report.desc,
+                    },
+                });
+        if(data){
+            modal.hide();
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
+
+
+
+
+// Bookmark
+const bookmarkAdd = async(id,index) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            adsSuggestion.value[index].is_bookmarked = 1;
+        }
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
+}
+
+const bookmarkRemove = async(id,index) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            adsSuggestion.value[index].is_bookmarked = 0;
+        }
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
 }
 
 </script>
@@ -247,7 +352,7 @@ const imageMouseMove = (e) => {
                         <div class="w-3/12">
                             <div class="slides flex flex-col gap-y-3">
                                 <div v-for="(image,index) in adsView?.picture" :key="index" class="item border border-cyan-500 rounded-lg">
-                                    <img class="rounded-lg w-full h-28 object-cover" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image.replaceAll('public','storage')" alt="Ads" />
+                                    <img class="rounded-lg w-full h-28 object-cover" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image?.replaceAll('public','storage')" alt="Ads" />
                                 </div>
                             </div>
                         </div>
@@ -257,6 +362,7 @@ const imageMouseMove = (e) => {
                     <div class="detail">
                         <div class="price">
                             <h4 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                {{ adsView?.title }}
                             </h4>
                             <div class="flex items-center justify-start gap-x-4 mt-2 mb-5 space-x-3 rtl:space-x-reverse">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1">
@@ -314,7 +420,7 @@ const imageMouseMove = (e) => {
                                 <img class="w-12 h-12 rounded-full" v-if="adsView?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+adsView?.user?.profile_picture" alt="profile picture">
                                 <div class="">
                                     <div class="font-medium text-gray-900 dark:text-white">
-                                        <nuxt-link :to="`/${adsView?.user?.name.replaceAll(' ','-')}/${adsView?.user?.id}/products`">{{ adsView?.user?.name }}</nuxt-link>
+                                        <nuxt-link :to="`/${adsView?.user?.name?.replaceAll(' ','-')}/${adsView?.user?.id}/products`">{{ adsView?.user?.name }}</nuxt-link>
                                     </div>
                                     <div class="flex gap-x-5">
                                         <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1">
@@ -351,7 +457,7 @@ const imageMouseMove = (e) => {
                                         <span>Start Chat</span>
                                     </div>
                                 </button>
-                                <button type="button" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                <button type="button" data-modal-target="report-modal" data-modal-toggle="report-modal" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 10a2.5 2.5 0 1 1 5 .2 2.4 2.4 0 0 1-2.5 2.4V14m0 3h0m9-5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -475,48 +581,22 @@ const imageMouseMove = (e) => {
                 <h4 class="text-xl font-semibold">Similar Ads</h4>
             </div>
             <div class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5">
-                <AdsItem>
+                <AdsItem v-for="(sads,index) of adsSuggestion" :key="sads.id" :adsItem="sads">
                     <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                        Technology acquisitions
+                        {{ common.parseText(sads.description,80) }}
                     </h5>
                     <div class="flex justify-between">
-                        <p class="text-md">abul kasem, 08:22</p>
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                        </svg>
-                    </div>
-                </AdsItem>
-                <AdsItem>
-                    <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                        Technology acquisitions
-                    </h5>
-                    <div class="flex justify-between">
-                        <p class="text-md">abul kasem, 08:22</p>
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                        </svg>
-                    </div>
-                </AdsItem>
-                <AdsItem>
-                    <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                        Technology acquisitions
-                    </h5>
-                    <div class="flex justify-between">
-                        <p class="text-md">abul kasem, 08:22</p>
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                        </svg>
-                    </div>
-                </AdsItem>
-                <AdsItem>
-                    <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                        Technology acquisitions
-                    </h5>
-                    <div class="flex justify-between">
-                        <p class="text-md">abul kasem, 08:22</p>
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                        </svg>
+                        <p class="text-sm">
+                            <nuxt-link :to="`/${sads?.user?.name?.replaceAll(' ','-')}/${sads?.user?.id}/products`">{{ sads?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(sads.created_at) }}
+                        </p>
+                        <div v-if="auth?.user?.id != sads?.user_id">
+                            <svg v-if="sads?.is_bookmarked == 1" @click="bookmarkRemove(sads?.id,index)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                            </svg>
+                            <svg v-else @click="bookmarkAdd(sads?.id,index)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                            </svg>
+                        </div>
                     </div>
                 </AdsItem>
             </div>
@@ -611,7 +691,7 @@ const imageMouseMove = (e) => {
     </div>
 
 
-    <!-- Main modal -->
+    <!-- Review modal -->
     <div id="reviews-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-lg max-h-full">
             <!-- Modal content -->
@@ -629,11 +709,20 @@ const imageMouseMove = (e) => {
                     </button>
                 </div>
                 <!-- Modal body -->
-                <form @submit.prevent="handelSubmit" class="p-4 md:p-5">
+                <form v-if="!reviewsendckeck" @submit.prevent="handelSubmit" class="p-4 md:p-5">
                     <div class="grid gap-4 mb-4 grid-cols-2">
-                        <div class="col-span-2">
-                            <label for="rating" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Rating</label>
-                            <input type="text" v-model="form.rating" name="rating" id="rating" min="1" max="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="5" required="">
+                        <label for="rating" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Rating</label>
+                        <div class="col-span-2 relative">
+                            <div class="inline-flex items-center absolute pointer-events-none">
+                                <svg v-for="(rat, index) in ratingnum" class="w-6 h-6 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                </svg>
+                            </div>
+                            <div class="inline-flex items-center pointer-events-auto" id="ratingStar" style="width:120px">
+                                <svg v-for="(rats, index) in ratingPoint" @click="ratingnumFun(index)" class="w-6 h-6 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                </svg>
+                            </div>
                         </div>
                         <div class="col-span-2">
                             <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Review</label>
@@ -662,25 +751,20 @@ const imageMouseMove = (e) => {
                                 </div>
                             </div>
                             <div class="flex item-center gap-x-2 mb-1">
-                                <div class="flex items-center space-x-1 rtl:space-x-reverse">
-                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                    </svg>
-                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                    </svg>
-                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                    </svg>
-                                    <svg class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                    </svg>
-                                    <svg class="w-3 h-3 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                    </svg>
+                                <div class="col-span-2 relative">
+                                    <div class="inline-flex items-center h-full my-auto absolute pointer-events-none">
+                                        <svg v-for="(rat, index) in reviw?.rating" class="w-3 h-3 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="inline-flex items-center pointer-events-auto" style="width:60px">
+                                        <svg v-for="(rats, index) in ratingPoint" @click="ratingnumFun(index)" class="w-3 h-3 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                        </svg>
+                                    </div>
                                 </div>
                                 <div class="flex item-center">
-                                    <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">4.95</p>
+                                    <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">{{ reviw?.rating }}</p>
                                     <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">out of</p>
                                     <p class="ms-1 text-xs text-gray-500 dark:text-gray-400">5</p>
                                 </div>
@@ -743,6 +827,45 @@ const imageMouseMove = (e) => {
                     <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Please Login First ! Try agian.</h3>
                     <button data-modal-hide="start-chat-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Ok</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Report modal -->
+    <div id="report-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-lg max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Report
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="report-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <form @submit.prevent="handelReportSubmit" class="p-4 md:p-5">
+                    <div class="grid gap-4 mb-4 grid-cols-2">
+                        <div class="col-span-2">
+                            <label for="subject" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Report Subject</label>
+                            <input type="text" v-model="report.subject" name="subject" id="subject" min="1" max="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Report Subject" required="">
+                        </div>
+                        <div class="col-span-2">
+                            <label for="desc" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                            <textarea id="desc" v-model="report.desc" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write report here"></textarea>                    
+                        </div>
+                    </div>
+                    <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Add Report
+                    </button>
+                </form>
+
             </div>
         </div>
     </div>

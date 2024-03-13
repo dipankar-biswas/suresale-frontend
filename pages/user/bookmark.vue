@@ -1,4 +1,15 @@
 <script setup>
+definePageMeta({
+  middleware: ["auth"]
+})
+useSeoMeta({
+  title: 'Bookmark Products - My Amazing Site',
+  ogTitle: 'My Amazing Site',
+  description: 'This is my amazing site, let me tell you all about it.',
+  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  ogImage: 'image',
+  twitterCard: 'image',
+})
 const datetime = useDateTime();
 const listgrid = ref(1);
 
@@ -23,26 +34,6 @@ const MyBookmarks = async() => {
 MyBookmarks();
 
 
-const bookmarkAdd = async(id,index) => {
-    console.log(id);
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        console.log(data);
-        if(data){
-            regularAds.value[index].is_bookmarked = 1;
-        }
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-
 const bookmarkRemove = async(id,index) => {
     const token = useTokenStore();
     try{
@@ -53,119 +44,12 @@ const bookmarkRemove = async(id,index) => {
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        console.log(data);
-        if(data){
-            regularAds.value[index].is_bookmarked = 0;
-        }
+        MyBookmarks();
     }catch(error){
         console.log('Somthing Wrong!');
     }
 }
 
-
-// ==============================
-// Message
-const replies = ref([]);
-const replybox = ref([]);
-const reviewReplyBtn = async(id,index) => {
-    if(replybox.value[index] == true){
-        replybox.value[index] = false;
-    }else{
-        replybox.value[index] = true;
-    }
-    reviewReply(id,index);
-}
-
-const reviewReply = async(id,index) => {
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}`);
-        console.log(data.value.data.replies);
-        replies.value[index] = data.value.data.replies;
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-
-
-const toUuid = ref(null);
-const productsId = ref(null);
-const toUser = ref(null);
-const msgShowBtn = (to_uuid, product_id, form_uuid, uName, uPicture) => {
-    toUuid.value = to_uuid;
-    productsId.value = product_id;
-    console.log(to_uuid, product_id, form_uuid, uName, uPicture);
-    const touser = {
-        name:uName,
-        profile_picture:uPicture,
-        form_uuid:form_uuid,
-        product_id:product_id,
-    }
-    toUser.value = touser;
-    getMessages();
-}
-const getmessage = ref('');
-const getMessages = async() => {
-    refreshNuxtData();
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=0&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
-                    method: 'GET',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        console.log(data);
-        getmessage.value = data.value.data.data.reverse();
-    }catch(error){
-        console.log(error);
-    }
-}
-
-
-
-const loadMoreMsgFun = async(id) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=${id}&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
-                    method: 'GET',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        console.log(data);
-        getmessage.value.push(...data.value.data.data);
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-
-const replyText = ref([]);
-const handelReplySubmit = async(id,index) => {
-    console.log(id, index);
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}?review_id=${auth?.user?.id}&reply=${replyText.value[index]}`, {
-                    method: 'PATCH',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            replyText.value[index] = '';
-            reviewReply(id,index);
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
-
-const chathideshow = ref(false);
-const chathideFun = async(event) => {
-    chathideshow.value = event;
-}
 
 </script>
 
@@ -229,9 +113,6 @@ const chathideFun = async(event) => {
                                             <nuxt-link :to="`${ads?.user?.name.replaceAll(' ','-')}/${ads?.user?.id}/products`">{{ ads?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(ads.created_at) }}
                                         </p>
                                         <svg v-if="ads.is_bookmarked == 1" @click="bookmarkRemove(ads.id,index)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                                        </svg>
-                                        <svg v-else @click="bookmarkAdd(ads.id,index)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
                                         </svg>
                                     </div>

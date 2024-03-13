@@ -27,10 +27,10 @@ const handelSubmit = async() => {
         <div class="max-w-screen-2xl flex flex-wrap items-end justify-between h-full mx-auto p-4">
         
             <form class="flex justify-center w-full">
-                <div class="flex">
+                <div class="flex justify-center w-3/4">
                     
                     <form @submit.prevent="handelSubmit" action="`/search`" class="relative w-full flex">
-                        <div class="flex">
+                        <div class="flex w-full">
                             <select id="categories"
                                 v-model="form.category"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">

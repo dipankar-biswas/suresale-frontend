@@ -1,3 +1,16 @@
+<script setup>
+definePageMeta({
+  middleware: ["auth"]
+})
+useSeoMeta({
+  title: 'My Dashboard - My Amazing Site',
+  ogTitle: 'My Amazing Site',
+  description: 'This is my amazing site, let me tell you all about it.',
+  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  ogImage: 'image',
+  twitterCard: 'image',
+})
+</script>
 <template>    
     <div class="content">
         <div class="max-w-screen-2xl flex gap-x-4 h-full mx-auto px-4 py-9">
