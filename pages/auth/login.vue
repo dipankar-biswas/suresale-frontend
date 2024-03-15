@@ -26,7 +26,7 @@ const handleSubmit = async() => {
         await auth.login(form);
         loadbtn.value = false;
     }catch(error){
-        toaster.addWrong();
+        toaster.addWrong(error.data.message);
         errors.value = error.data.errors;
         loadbtn.value = false;
     }

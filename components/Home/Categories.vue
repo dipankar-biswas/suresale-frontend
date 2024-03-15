@@ -14,44 +14,48 @@ const getCetagories = async() => {
 }
 getCetagories();
 
-const sliderDivWidht = document?.querySelector('.slider-width')?.offsetWidth;
-const showNum = ref(1);
-if(window?.innerWidth > 991){
-    showNum.value = 7;
-}else if(window?.innerWidth > 767){
-    showNum.value = 4;
-}else if(window?.innerWidth > 575){
-    showNum.value = 3;
-}else if(window?.innerWidth > 375){
-    showNum.value = 2;
-}
-const gap = ref(10);
-const currentIndex = ref(0);
-const slideWidht = ref(parseFloat(sliderDivWidht) / parseFloat(showNum.value));
-const gapbad = ref((gap.value * (showNum.value - 1)) /showNum.value);
-const gapextplus = ref(gap.value - gapbad.value);
-
-const divWidth = ref(sliderDivWidht);
-const singleWidth = ref(parseFloat(slideWidht.value) - parseFloat(gapbad.value));
-
-const next = () => {
-    if (currentIndex.value < categories.value.length - showNum.value) {
-        showSlide(currentIndex.value + 1);
+// if(categories.value.length > 0)
+    const sliderDivWidht = document?.querySelector('.slider-width')?.offsetWidth;
+    const showNum = ref(1);
+    if(window?.innerWidth > 991){
+        showNum.value = 7;
+    }else if(window?.innerWidth > 767){
+        showNum.value = 4;
+    }else if(window?.innerWidth > 575){
+        showNum.value = 3;
+    }else if(window?.innerWidth > 375){
+        showNum.value = 2;
     }
-}
+    const gap = ref(10);
+    const currentIndex = ref(0);
+    const slideWidht = ref(parseFloat(sliderDivWidht) / parseFloat(showNum.value));
+    const gapbad = ref((gap.value * (showNum.value - 1)) /showNum.value);
+    const gapextplus = ref(gap.value - gapbad.value);
+    
+    const divWidth = ref(sliderDivWidht);
+    const singleWidth = ref(parseFloat(slideWidht.value) - parseFloat(gapbad.value));
 
-const prev = () => {
-    if (currentIndex.value > 0) {
-        showSlide(currentIndex.value - 1);
+
+    const next = () => {
+        if (currentIndex.value < categories.value.length - showNum.value) {
+            showSlide(currentIndex.value + 1);
+        }
     }
-}
+    
+    const prev = () => {
+        if (currentIndex.value > 0) {
+            showSlide(currentIndex.value - 1);
+        }
+    }
+    
+    function showSlide(index) {
+        const sliderContent = document?.querySelector('#sliderContent');
+        currentIndex.value = index;
+        let translateValue = -index * (slideWidht.value + gapextplus.value);
+        sliderContent.style.transform = 'translateX(' + translateValue + 'px)';
+    }
+// )
 
-function showSlide(index) {
-    const sliderContent = document?.querySelector('#sliderContent');
-    currentIndex.value = index;
-    let translateValue = -index * (slideWidht.value + gapextplus.value);
-    sliderContent.style.transform = 'translateX(' + translateValue + 'px)';
-}
 
 
 </script>

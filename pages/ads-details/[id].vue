@@ -1,28 +1,12 @@
 <script setup>
 import { Modal } from 'flowbite';
 
+const toaster = useToasterStore();
 const auth = useAuthStore();
 const route = useRoute();
 const datetime = useDateTime();
 const common = useCommonFun();
 
-
-function normalizeAndReverseArray(arr) {
-  // Step 1: Reverse the array
-  const reversedArray = arr.reverse();
-
-  // Step 2: Find the minimum and maximum values
-  const minValue = Math.min(...reversedArray);
-  const maxValue = Math.max(...reversedArray);
-
-  // Step 3: Normalize the values
-  const normalizedArray = reversedArray.map(value => {
-    const normalizedValue = (value - minValue) / (maxValue - minValue);
-    return normalizedValue;
-  });
-
-  return normalizedArray;
-}
 
 const adsView = ref([]);
 const adsSuggestion = ref([]);
@@ -81,25 +65,43 @@ const AllReviews = async() => {
 }
 AllReviews();
 
-const handelSubmit = async() => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`, {
-                    method: 'PUT',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                    body: {
-                        product_id: productId.value,
-                        rating: form.rating,
-                        comment: form.comment,
-                    },
-                });
-        console.log(data);
-        AllReviews(productId.value);
-    }catch(error){
-        console.log(error);
+const rerrors = ref([]);
+const handelReviewSubmit = async() => {
+    if(form.rating == null || form.rating == '' && form.comment == null || form.comment == ''){
+        rerrors.value[0] = 'Rating select!';
+        rerrors.value[1] = 'Comment this product!';
+    }else if(form.rating == null || form.rating == ''){
+        rerrors.value[0] = 'Rating select!';
+        rerrors.value[1] = '';
+    }else if(form.comment == null || form.comment == ''){
+        rerrors.value[1] = 'Comment this product!';
+        rerrors.value[0] = '';
+    }else{
+        rerrors.value[0] = '';
+        rerrors.value[1] = '';
+        const modal = new Modal(document.getElementById('reviews-modal'), null);
+        const token = useTokenStore();
+        try{
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`, {
+                        method: 'PUT',
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token.getToken}`,
+                        },
+                        body: {
+                            product_id: productId.value,
+                            rating: form.rating,
+                            comment: form.comment,
+                        },
+                    });
+                if(data){
+                    modal.hide();
+                    AllReviews(productId.value);
+                    toaster.addSuccess(data.message);
+                }
+        }catch(error){
+            toaster.addWrong(error.data.message);
+        }
     }
 }
 
@@ -119,15 +121,15 @@ const reviewReplyBtn = async(id,index) => {
 const reviewReply = async(id,index) => {
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}`);
-        console.log(data.value.data.replies);
         replies.value[index] = data.value.data.replies;
     }catch(error){
-        console.log('Somthing Wrong!');
+        toaster.addWrong(error.data.message);
     }
 }
 
 const replyText = ref([]);
 const handelReplySubmit = async(id,index) => {
+    const modal = new Modal(document.getElementById('reviews-modal'), null);
     const token = useTokenStore();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}?review_id=${auth?.user?.id}&reply=${replyText.value[index]}`, {
@@ -138,11 +140,13 @@ const handelReplySubmit = async(id,index) => {
                     },
                 });
         if(data){
+            modal.hide();
             replyText.value[index] = '';
             reviewReply(id,index);
+            toaster.addSuccess(data.message);
         }
     }catch(error){
-        console.log(error);
+        toaster.addWrong(error.data.message);
     }
 }
 
@@ -181,7 +185,7 @@ const getMessages = async() => {
         getmessage.value = data.value.data.data.reverse();
         chatslistlastid.value = data.value.data.data[0].id;
     }catch(error){
-        console.log(error);
+        toaster.addWrong(error.data.message);
     }
 }
 
@@ -238,7 +242,7 @@ const loadMoreMsgFun = async(id) => {
                 chatslistlastid.value = 0;
             }
     }catch(error){
-        console.log(error);
+        toaster.addWrong(error.data.message);
     }
 }
 
@@ -284,27 +288,43 @@ const report = reactive({
     subject: null,
     desc: null,
 })
+
+const rrerrors = ref([]);
 const handelReportSubmit = async() => {
-    const modal = new Modal(document.getElementById('report-modal'), null);
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report`, {
-                    method: 'POST',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                    body: {
-                        product_id: productId.value,
-                        subject: report.subject,
-                        desc: report.desc,
-                    },
-                });
-        if(data){
-            modal.hide();
+    if(report.subject == null || report.subject == '' && report.desc == null || report.desc == ''){
+        rrerrors.value[0] = 'Enter your subject!';
+        rrerrors.value[1] = 'Enter your description!';
+    }else if(report.subject == null || report.subject == ''){
+        rrerrors.value[0] = 'Enter your subject!';
+        rrerrors.value[1] = '';
+    }else if(report.desc == null || report.desc == ''){
+        rrerrors.value[1] = 'Enter your description!';
+        rrerrors.value[0] = '';
+    }else{
+        rrerrors.value[0] = '';
+        rrerrors.value[1] = '';
+        const modal = new Modal(document.getElementById('report-modal'), null);
+        const token = useTokenStore();
+        try{
+            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report`, {
+                        method: 'POST',
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token.getToken}`,
+                        },
+                        body: {
+                            product_id: productId.value,
+                            subject: report.subject,
+                            desc: report.desc,
+                        },
+                    });
+            if(data){
+                modal.hide();
+                toaster.addSuccess(data.message);
+            }
+        }catch(error){
+            toaster.addWrong(error.data.message);
         }
-    }catch(error){
-        console.log(error);
     }
 }
 
@@ -648,89 +668,6 @@ const bookmarkRemove = async(id,index) => {
     <!-- Popular Searches -->
     <HomePopularSearches></HomePopularSearches>
     
-    <!-- Banner -->
-    <div class="mx-auto w-full max-w-screen-2xl p-4 py-2">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-4">
-            <div class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="relative h-full">
-                    <a href="#">
-                        <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                    </a>
-                    <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                        <div class="text-center p-3 flex flex-col justify-end h-full">
-                            <p class="text-white text-lg">Grow business with us</p>
-                            <h3 class="text-white text-2xl">Business Plans</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="flex flex-col gap-y-3">
-                    <div class="relative h-full">
-                        <a href="#">
-                            <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                        </a>
-                        <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                            <div class="text-center p-3 flex flex-col justify-end h-full">
-                                <p class="text-white text-lg">Grow business with us</p>
-                                <h3 class="text-white text-2xl">Business Plans</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative h-full">
-                        <a href="#">
-                            <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                        </a>
-                        <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                            <div class="text-center p-3 flex flex-col justify-end h-full">
-                                <p class="text-white text-lg">Grow business with us</p>
-                                <h3 class="text-white text-2xl">Business Plans</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="relative h-full">
-                    <a href="#">
-                        <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                    </a>
-                    <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                        <div class="text-center p-3 flex flex-col justify-end h-full">
-                            <p class="text-white text-lg">Grow business with us</p>
-                            <h3 class="text-white text-2xl">Business Plans</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="flex flex-col gap-y-3">
-                    <div class="relative h-full">
-                        <a href="#">
-                            <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                        </a>
-                        <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                            <div class="text-center p-3 flex flex-col justify-end h-full">
-                                <p class="text-white text-lg">Grow business with us</p>
-                                <h3 class="text-white text-2xl">Business Plans</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative h-full">
-                        <a href="#">
-                            <img class="rounded-lg  h-full" src="assets/images/slider/slider-1.webp" alt="Ads" />
-                        </a>
-                        <div class="text-xs font-medium text-blue-800 text-center p-0.5 leading-none rounded-lg px-2 absolute left-0 top-0 w-full h-full backdrop-brightness-90">
-                            <div class="text-center p-3 flex flex-col justify-end h-full">
-                                <p class="text-white text-lg text-shadow-lg shadow-black">Grow business with us</p>
-                                <h3 class="text-white text-2xl text-shadow-lg shadow-black">Business Plans</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <!-- Review modal -->
@@ -751,24 +688,28 @@ const bookmarkRemove = async(id,index) => {
                     </button>
                 </div>
                 <!-- Modal body -->
-                <form v-if="!reviewsendckeck" @submit.prevent="handelSubmit" class="p-4 md:p-5">
+                <form v-if="!reviewsendckeck" @submit.prevent="handelReviewSubmit" class="p-4 md:p-5">
                     <div class="grid gap-4 mb-4 grid-cols-2">
                         <label for="rating" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Rating</label>
-                        <div class="col-span-2 relative">
-                            <div class="inline-flex items-center absolute pointer-events-none">
-                                <svg v-for="(rat, index) in ratingnum" class="w-6 h-6 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                </svg>
+                        <div class="col-span-2 ">
+                            <div class=relative>
+                                <div class="inline-flex items-center absolute pointer-events-none">
+                                    <svg v-for="(rat, index) in ratingnum" class="w-6 h-6 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                </div>
+                                <div class="inline-flex items-center pointer-events-auto" id="ratingStar" style="width:120px">
+                                    <svg v-for="(rats, index) in ratingPoint" @click="ratingnumFun(index)" class="w-6 h-6 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="inline-flex items-center pointer-events-auto" id="ratingStar" style="width:120px">
-                                <svg v-for="(rats, index) in ratingPoint" @click="ratingnumFun(index)" class="w-6 h-6 text-gray-300 dark:text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                                </svg>
-                            </div>
+                            <span v-if="rerrors[0]" class="text-sm text-red-500">{{ rerrors[0] }}</span>
                         </div>
                         <div class="col-span-2">
                             <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Review</label>
                             <textarea id="description" v-model="form.comment" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write product review here"></textarea>                    
+                            <span v-if="rerrors[1]" class="text-sm text-red-500">{{ rerrors[1] }}</span>
                         </div>
                     </div>
                     <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -896,11 +837,13 @@ const bookmarkRemove = async(id,index) => {
                     <div class="grid gap-4 mb-4 grid-cols-2">
                         <div class="col-span-2">
                             <label for="subject" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Report Subject</label>
-                            <input type="text" v-model="report.subject" name="subject" id="subject" min="1" max="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Report Subject" required="">
+                            <input type="text" v-model="report.subject" name="subject" id="subject" min="1" max="5" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Report Subject">
+                            <span v-if="rrerrors[0]" class="text-sm text-red-500">{{ rrerrors[0] }}</span>
                         </div>
                         <div class="col-span-2">
                             <label for="desc" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
                             <textarea id="desc" v-model="report.desc" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write report here"></textarea>                    
+                            <span v-if="rrerrors[1]" class="text-sm text-red-500">{{ rrerrors[1] }}</span>
                         </div>
                     </div>
                     <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

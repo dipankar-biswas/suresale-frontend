@@ -8,10 +8,12 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const toaster = useToasterStore();
 const auth = useAuthStore();
 definePageMeta({
   middleware: ["guest"]
 })
+
 const form = reactive({
     email: null,
 })
@@ -26,7 +28,9 @@ const handleSubmit = async() => {
         const data = await auth.forgetpass(form);
         loadbtn.value = false;
         success_msg.value = data.message;
+        toaster.addSuccess(data.message);
     }catch(error){
+        toaster.addWrong(error.data.message);
         errors.value = error.data.errors;
         loadbtn.value = false;
     }

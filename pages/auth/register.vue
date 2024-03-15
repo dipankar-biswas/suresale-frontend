@@ -8,9 +8,10 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const toaster = useToasterStore();
 const auth = useAuthStore();
 definePageMeta({
-  middleware: ["guest"]
+    middleware: ["guest"]
 })
 
 const form = reactive({
@@ -29,6 +30,7 @@ const handleSubmit = async() => {
         await auth.register(form);
         loadbtn.value = false;
     }catch(error){
+        toaster.addWrong(error.data.message);
         errors.value = error.data.errors;
         loadbtn.value = false;
     }

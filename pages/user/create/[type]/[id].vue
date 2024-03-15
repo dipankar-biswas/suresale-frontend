@@ -179,7 +179,7 @@ const handelSubmit = async() => {
         form.lng = data.value?.results[0].geometry.location.lng;
 
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 
     loadbtn.value = true;
@@ -231,7 +231,7 @@ const handelSubmit = async() => {
                 form.fields.key1[i].value = null;
             }
             loadbtn.value = false;
-            toaster.addSuccess(data.value?.message);
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         loadbtn.value = false;

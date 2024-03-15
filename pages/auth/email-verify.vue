@@ -8,9 +8,10 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const toaster = useToasterStore();
 const auth = useAuthStore();
-
 const route = useRoute();
+
 const form = reactive({
     linkPeram: route.fullPath.split("?")[1],
 })
@@ -22,7 +23,9 @@ onMounted( async() => {
     try{
         const data = await auth.emailVerify(form);
         success_msg.value = data.message;
+        toaster.addSuccess(data.message);
     }catch(error){
+        toaster.addWrong(error.data.message);
         errors.value = error.data.errors;
     }  
 })

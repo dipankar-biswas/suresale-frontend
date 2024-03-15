@@ -35,9 +35,11 @@ export const useAuthStore = defineStore('auth', {
         },
 
         commonSeller(data){
+            const toaster = useToasterStore();
             const token = useTokenStore();
             token.setToken(data.token);
             this.user = data.user;
+            toaster.addSuccess(data.message);
             return navigateTo('/user/dashboard');
         },
         

@@ -32,7 +32,5 @@ useSeoMeta({
     <!-- Regular Ads -->
     <!-- <HomeRegularAds></HomeRegularAds> -->
 
-    <!-- Banner -->
-    <BannerAds></BannerAds>
     
 </template>
