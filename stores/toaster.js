@@ -4,6 +4,11 @@ export const useToasterStore = defineStore('toaster', {
         success: [], 
         wrong: [], 
         delete: [], 
+
+        infomsg: [], 
+        successmsg: [], 
+        wrongmsg: [], 
+        deletemsg: [],
     }),
 
     actions: {
@@ -22,31 +27,37 @@ export const useToasterStore = defineStore('toaster', {
         },
 
         // Success
-        addSuccess() {
+        addSuccess(msg) {
             this.success.push(true);
+            this.successmsg.push(msg);
             this.removeSuccessAuto(this.success.length-1);
         },
         removeSuccessAuto(index) {
             setTimeout(() => {
                 this.success[index] = false;
+                this.successmsg[index] = '';
             },4000)
         },
         removeSuccess(index) {
             this.success[index] = false;
+            this.successmsg[index] = '';
         },
 
         // Wrong
-        addWrong() {
+        addWrong(msg) {
             this.wrong.push(true);
+            this.wrongmsg.push(msg);
             this.removeWrongAuto(this.wrong.length-1);
         },
         removeWrongAuto(index) {
             setTimeout(() => {
                 this.wrong[index] = false;
+                this.wrongmsg[index] = '';
             },4000)
         },
         removeWrong(index) {
             this.wrong[index] = false;
+            this.wrongmsg[index] = '';
         },
 
         // Delete

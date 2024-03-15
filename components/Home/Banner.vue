@@ -33,7 +33,7 @@ const handelSubmit = async() => {
                         <div class="flex w-full">
                             <select id="categories"
                                 v-model="form.category"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                class="w-fit bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option disabled value="">Category</option>
                                 <option v-for="cat of categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                             </select>

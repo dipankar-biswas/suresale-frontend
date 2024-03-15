@@ -11,6 +11,7 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const toaster = useToasterStore();
 const auth = useAuthStore();
 const route = useRoute();
 
@@ -91,35 +92,18 @@ const onChange = (event) => {
     }
 
 }
+const removeImage = (index) => {
+    
+    console.log('view');
+    console.log(form.image);
+    console.log(galleryData.value);
 
+    galleryData.value = galleryData.value?.filter((item,ind) => ind !== index);
 
-// let GalleryData = {
-//     gallery: [
-//         {
-//             id: 0,
-//             imgPath: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg",
-//         },
-//         {
-//             id: 1,
-//             imgPath: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg",
-//         },
-//         {
-//             id: 2,
-//             imgPath: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-3.jpg",
-//         },
-//         {
-//             id: 3,
-//             imgPath: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-4.jpg",
-//         },
-//         {
-//             id: 4,
-//             imgPath: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-5.jpg",
-//         },
-//     ]
-// }
-// galleryData.value = GalleryData.gallery;
-
-
+    console.log('result');
+    console.log(form.image);
+    console.log(galleryData.value);
+}
 
 const open = ref(false);
 const allTags = ref([]);
@@ -153,6 +137,36 @@ function removeTodo(index) {
 }
 
 
+const categories = ref([]);
+const catId = ref(route.params.id);
+const category_name = ref(null);
+const getCetagories = async() => {
+    refreshNuxtData();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
+        categories.value = data.value.data;
+        category_name.value = categories.value.find(item => item?.id == catId.value)?.name;
+    }catch(error){
+        console.log('Somthing Wrong!');
+    }
+}
+getCetagories();
+
+
+
+const errors = ref([]);
+const loadbtn = ref(false);
+const condition_name = ref(null);
+
+watch(() => form.condition, async (currentValue) => {
+    if(currentValue > 0){
+        condition_name.value = conditions.value.find(item => item?.id === currentValue)?.name;
+    }
+  },
+  {deep: true}
+);
+
+
 const handelSubmit = async() => {
     try{
         const { pending, data } = await useFetch('https://maps.googleapis.com/maps/api/geocode/json',{
@@ -168,6 +182,7 @@ const handelSubmit = async() => {
         console.log('Somthing Wrong!');
     }
 
+    loadbtn.value = true;
     let formdata = new FormData();
     formdata.append("type_id", route.params.type);
     formdata.append("title", form.title);
@@ -182,7 +197,6 @@ const handelSubmit = async() => {
     formdata.append("lng", form.lng);
     formdata.append("currency_id", form.currency_id);
     for (let i = 0; i < form.tags.length; i++) {
-        console.log(form.tags[i]);
         formdata.append(`tags[]`, form.tags[i]);
     }
     for (let i = 0; i < form.image.length; i++) {
@@ -190,10 +204,6 @@ const handelSubmit = async() => {
     }
     for (let i = 0; i < fields.value.length; i++) {
         formdata.append(`${fields.value[i].name}`, form.fields.key1[i].value);
-    }
-
-    for (var data of formdata) {
-        console.log(data);
     }
 
     const token = useTokenStore();
@@ -206,10 +216,27 @@ const handelSubmit = async() => {
             },
             body: formdata
         });
-
-        return data;
+        if(data){
+            form.title = null;
+            form.price = null;
+            form.description = null;
+            form.stock = null;
+            form.condition = null;
+            form.location = null;
+            form.tags = [];
+            todos.value = [];
+            form.image = [];
+            galleryData.value = [];
+            for (let i = 0; i < fields.value.length; i++) {
+                form.fields.key1[i].value = null;
+            }
+            loadbtn.value = false;
+            toaster.addSuccess(data.value?.message);
+        }
     }catch(error){
-        throw error;
+        loadbtn.value = false;
+        errors.value = error.data.errors;
+        toaster.addWrong(error.data?.message);
     }
 }
 
@@ -265,16 +292,19 @@ const imageMouseMove = (e) => {
                                 <input id="dropzone-file" type="file" class="hidden" @change="onChange" multiple/>
                             </label>
                         </div>
+                        <span v-if="errors.image" class="text-sm text-red-500">{{ errors.image[0] }}</span>
 
                         <h4 class="text-md font-semibold mb-5 mt-8">Required</h4>
                         <div>
                             <div class="mb-3">
                                 <input type="text" name="title" v-model="form.title" id="default-input" placeholder="Title"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <span v-if="errors.title" class="text-sm text-red-500">{{ errors.title[0] }}</span>
                             </div>
                             <div class="mb-2">
                                 <input type="text" name="price" v-model="form.price" id="default-input" placeholder="Price"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <span v-if="errors.price" class="text-sm text-red-500">{{ errors.price[0] }}</span>
                             </div>
                             <div class="mb-3">
                                 <textarea id="description" name="description" v-model="form.description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description"></textarea>
@@ -295,6 +325,7 @@ const imageMouseMove = (e) => {
                             <div class="mb-2">
                                 <input type="text" name="stock" v-model="form.stock" id="default-input" placeholder="Stock"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <span v-if="errors.stock_amount" class="text-sm text-red-500">{{ errors.stock_amount[0] }}</span>
                             </div>
                             <div class="mb-3">
                                 <select id="condition"
@@ -303,6 +334,7 @@ const imageMouseMove = (e) => {
                                     <option disabled value="null">Condition</option>
                                     <option v-for="cond in conditions" :key="cond.id" :value="cond.id">{{ cond.name }}</option>
                                 </select>
+                                <span v-if="errors.condition_id" class="text-sm text-red-500">{{ errors.condition_id[0] }}</span>
                             </div>
 
                             <div class="mb-3">
@@ -326,6 +358,7 @@ const imageMouseMove = (e) => {
                                         <span @click="removeTodo(index)" class="text-sm ms-2 cursor-pointer hover:text-red-400">&#10005;</span>
                                     </span>
                                 </div>
+                                <span v-if="errors.tags" class="text-sm text-red-500">{{ errors.tags[0] }}</span>
                             </div>
 
                             <div class="mb-2">
@@ -377,6 +410,7 @@ const imageMouseMove = (e) => {
                                     <div class="grid grid-cols-5 gap-4">
                                         <div v-for="(slide,index) in galleryData" :key="index">
                                             <img @click="showImage = slide" class="h-auto max-w-full rounded-lg" :src="slide" alt="Image">
+                                            <button @click="removeImage(index)">remove</button>
                                         </div>
                                     </div>
                                 </div>
@@ -398,7 +432,7 @@ const imageMouseMove = (e) => {
                                     </p>
                                     <h3 class="text-xl font-semibold mb-3">Details</h3>
                                     <p class="text-sm font-normal mb-2">
-                                        <span v-if="form.category != null && form.category != ''" class="font-semibold">Category : </span><span>{{ form.category }}</span>
+                                        <span v-if="category_name != null && category_name != ''" class="font-semibold">Category : </span><span>{{ category_name }}</span>
                                     </p>
                                     <div v-if="fields.length > 0">
                                         <p v-for="(field,index) in fields" :key="field.name.id" class="text-sm font-normal mb-2">
@@ -406,7 +440,7 @@ const imageMouseMove = (e) => {
                                         </p>
                                     </div>
                                     <p class="text-sm font-normal mb-2">
-                                        <span v-if="form.condition != null && form.condition != ''" class="font-semibold">Condition : </span><span>{{ form.condition }}</span>
+                                        <span v-if="form.condition != null && form.condition != ''" class="font-semibold">Condition : </span><span>{{ condition_name }}</span>
                                     </p>
                                     <p class="text-sm font-normal mb-2">
                                         <span v-if="form.location != null && form.location != ''" class="font-semibold">Address : </span><span>{{ form.location }}</span>

@@ -1,7 +1,7 @@
 <script setup>
 const auth = useAuthStore();
 const route = useRoute();
-const props = defineProps(['chathideshow','toUser','getmessage', 'getMessages']);
+const props = defineProps(['chathideshow','toUser','getmessage','chatslistlastid']);
 const emit = defineEmits(['chathide','loadmoremsgid']);
 
 const chathide = () => {
@@ -13,18 +13,20 @@ const form = reactive({
     message: null,
 })
 
-const sdf = {
-            id: 24,
-            from_uuid: "2",
-            to_uuid: "1",
-            product_id: 2,
-            message: "GEsdf",
-            created_at: "2024-03-03T11:27:50.000000Z",
-            updated_at: "2024-03-03T11:27:50.000000Z"
-        }
+// const newChat = {
+//             id: props.getmessage[props.getmessage.length] + 1,
+//             from_uuid: auth?.user?.id?.toString(),
+//             to_uuid: props?.toUser?.form_uuid?.toString(),
+//             product_id: props?.toUser?.product_id,
+//             message: form.message,
+//             created_at: Date.now(),
+//             updated_at: Date.now(),
+//         }
 
+const msgid = ref(null);
 const handelSubmit = async() => {
     loadbtn.value = true;
+    let chats = document?.getElementById('chats');
     const token = useTokenStore();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message`, {
@@ -42,8 +44,22 @@ const handelSubmit = async() => {
                 });
         if(data){
             loadbtn.value = false;
+            msgid.value = props.getmessage[props.getmessage.length - 1].id + 1;
+            let newChatMsg = ''
+            newChatMsg += `<div>
+                            <div class="chat right flex flex-row-reverse justify-end gap-x-3 mb-5">
+                                <div class="avatar flex">
+                                    <img class="w-7 h-7 rounded-full shadow-md" src="${useRuntimeConfig().public.imageUrl}${props.toUser?.profile_picture}" alt="Picture">
+                                </div>
+                                <div class="msg w-[calc(100%-32px)] flex items-end flex-col gap-y-2">
+                                    <div class="txt bg-gradient-to-r from-indigo-500 to-indigo-300 text-sm text-white shadow-md py-3 px-2 rounded-md who-arrow">
+                                    ${form.message}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+            chats.innerHTML= chats.innerHTML + newChatMsg;
             form.message = '';
-
         }
     }catch(error){
         loadbtn.value = false;
@@ -55,17 +71,6 @@ const loadMoreMsg = (id) => {
     emit('loadmoremsgid',id);
 }
 
-
-const handleSubmit = async() => {
-    loadbtn.value = true;
-    try{
-        await auth.login(form);
-        loadbtn.value = false;
-    }catch(error){
-        errors.value = error.data.errors;
-        loadbtn.value = false;
-    }
-}
 </script>
 
 <style>
@@ -163,15 +168,15 @@ const handleSubmit = async() => {
         </div>
         <div class="body h-[calc(100%-96px)] overflow-y-auto">
             <div class="scroll px-3 py-4">
-                <div class="chats">
-                    <button type="button" @click="loadMoreMsg(props.getmessage[0]?.id)">load data {{ props.getmessage[0]?.id }}</button>
+                <button type="button" v-if="props.chatslistlastid != 0" @click="loadMoreMsg(props.chatslistlastid)">load data {{ props.chatslistlastid }}</button>
+                <div class="chats" id="chats">
                     <div v-for="(msg,index) in props.getmessage" :key="msg.id">
                         <div v-if="msg?.from_uuid == auth?.user?.id" class="chat right flex flex-row-reverse justify-end gap-x-3 mb-5">
                             <div class="avatar flex">
                                 <img class="w-7 h-7 rounded-full shadow-md" v-if="auth?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="Picture">
                             </div>
                             <div class="msg w-[calc(100%-32px)] flex items-end flex-col gap-y-2">
-                                <div class="txt bg-gradient-to-r from-indigo-500 to-indigo-300 text-sm text-white shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}{{ msg?.id }}</div>
+                                <div class="txt bg-gradient-to-r from-indigo-500 to-indigo-300 text-sm text-white shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}</div>
                             </div>
                         </div>
                         <div v-else class="chat left flex gap-x-3 mb-5">
@@ -179,7 +184,7 @@ const handleSubmit = async() => {
                                 <img class="w-7 h-7 rounded-full shadow-md" v-if="props.toUser?.profile_picture" :src="useRuntimeConfig().public.imageUrl+props.toUser?.profile_picture" alt="Picture">
                             </div>
                             <div class="msg w-[calc(100%-32px)] flex items-start flex-col gap-y-2">
-                                <div class="txt bg-gray-100 text-sm text-gray-500 shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}{{ msg?.id }}</div>
+                                <div class="txt bg-gray-100 text-sm text-gray-500 shadow-md py-3 px-2 rounded-md who-arrow">{{ msg?.message }}</div>
                             </div>
                         </div>
                     </div>
