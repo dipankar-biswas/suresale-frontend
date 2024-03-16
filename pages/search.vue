@@ -163,7 +163,7 @@ const bookmarkRemove = async(id,index) => {
 </script>
 <template>
     <div class="content">
-        <div class="max-w-screen-2xl block lg:flex justify-between gap-x-4 h-full mx-auto px-4">
+        <div class="max-w-screen-2xl block md:flex justify-between gap-x-4 h-full mx-auto px-4">
 
             <Sidebar @priceFilter="priceFilterFun" @catChecked="catCheckedFun($event)" @condChecked="condCheckedFun($event)" @stateChecked="stateCheckedFun($event)" @adsChecked="adsCheckedFun($event)"></Sidebar>
 

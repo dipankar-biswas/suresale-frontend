@@ -4,32 +4,32 @@
 </script>
 <template>
 
-    <div class="bg-yellow-400 dark:bg-gray-900 w-full z-20 start-0 border-b border-gray-200 dark:border-gray-600 z-20">
+    <div class="bg-yellow-300 dark:bg-gray-900 w-full dark:border-gray-600 z-20">
       <div class="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto px-4">
         <div class="flex items-center space-x-3 rtl:space-x-reverse">
-            <ul class="font-medium flex px-0 sm:px-2 md:px-3 rounded-lg bg-gray-50 md:flex-row rtl:space-x-reverse md:mt-0  dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <ul class="font-medium flex px-0 sm:px-2 md:px-3 md:flex-row rtl:space-x-reverse md:mt-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
                 <li>
                     <a href="#"
-                        class="block py-2 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">For Business</a>
+                        class="block py-1 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">For Business</a>
                 </li>
                 <li>
                     <a href="#"
-                        class="block py-2 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">The Shops</a>
+                        class="block py-1 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">The Shops</a>
                 </li>
                 <li>
                     <a href="#"
-                        class="block py-2 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Compare</a>
+                        class="block py-1 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Compare</a>
                 </li>
                 <li>
                     <a href="#"
-                        class="block py-2 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Help</a>
+                        class="block py-1 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Help</a>
                 </li>
             </ul>
         </div>
         <div class="flex items-center">
-            <ul class="font-medium flex flex-col px-0 sm:px-2 md:px-3 border border-gray-100 rounded-lg bg-gray-50 md:flex-row rtl:space-x-reverse md:mt-0  dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <ul class="font-medium flex flex-col px-0 sm:px-2 md:px-3 md:flex-row rtl:space-x-reverse md:mt-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
                 <li>
-                    <a href="#"class="block py-2 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+                    <a href="#"class="block py-1 px-1 sm:px-3 text-xs sm:text-sm md:text-sm font-normal text-gray-900 rounded dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                         EN | BD
                     </a>
                 </li>
@@ -55,11 +55,11 @@
                             <ul class="font-normal md:font-medium flex bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
                                 <li>
                                     <nuxt-link to="/auth/register"
-                                        class="block py-1 px-1.5 sm:py-1.5 md:py-2 sm:px-2 md:px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Register</nuxt-link>
+                                        class="block py-1 px-1.5 sm:py-1.5 md:py-2 sm:px-2 md:px-3 text-gray-900 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Register</nuxt-link>
                                 </li>
                                 <li>
                                     <nuxt-link to="/auth/login"
-                                        class="block py-1 px-1.5 sm:py-1.5 md:py-2 sm:px-2 md:px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login</nuxt-link>
+                                        class="block py-1 px-1.5 sm:py-1.5 md:py-2 sm:px-2 md:px-3 text-gray-900 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login</nuxt-link>
                                 </li>
                             </ul>
                         </template>

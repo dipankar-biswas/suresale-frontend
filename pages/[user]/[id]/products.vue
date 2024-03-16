@@ -220,7 +220,7 @@
 
                 <div class="bg-gray-100 rounded-md px-4 py-5">
                     <div class="flex justify-between">
-                        <h4 class="text-lg font-semibold mb-3">All Products</h4>
+                        <h4 class="text-lg font-semibold mb-3">All Products ({{ allAds?.product?.total }})</h4>
                         <div class="actions flex items-center">
                             <button type="button" class="list p-1 rounded-s-md bg-gray-400 [&.active]:bg-gray-600" @click="listgrid = 2" :class="{ 'active' : listgrid == 2 }">
                                 <svg class="w-6 h-6 text-gray-800 [&.active]:text-white dark:text-white" :class="{ 'active' : listgrid == 2 }" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">

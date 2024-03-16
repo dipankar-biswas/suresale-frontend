@@ -401,8 +401,8 @@ const bookmarkRemove = async(id,index) => {
         </nav>
 
         <div v-if="adsView">
-            <div class="flex justify-between gap-x-6 h-full mt-6">
-                <div class="w-7/12">
+            <div class="flex flex-col justify-between gap-x-6 gap-y-3 md:flex-row h-full mt-6">
+                <div class="w-full md:w-7/12 mb-4 md:mb-0">
                     <div class="w-full flex gap-x-4">
                         
                         <div class="w-9/12">
@@ -420,7 +420,7 @@ const bookmarkRemove = async(id,index) => {
                         </div>
                     </div>
                 </div>
-                <div class="w-5/12">
+                <div class="w-full md:w-5/12">
                     <div class="detail">
                         <div class="price">
                             <h4 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">

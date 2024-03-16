@@ -58,7 +58,7 @@ const handelPriceFilter = () => {
 
 </script>
 <template>
-    <aside id="sidebar-multi-level-sidebar" class="fixed top-0 left-0 z-40 lg:z-0 w-64 h-screen lg:relative lg:h-auto transition-transform -translate-x-full md:translate-x-0" aria-label="Sidebar">
+    <aside id="sidebar-multi-level-sidebar" class="fixed top-0 left-0 z-40 md:z-0 w-64 h-screen md:relative md:h-auto transition-transform -translate-x-full md:translate-x-0" aria-label="Sidebar">
         <div class="h-full px-3 py-6 overflow-y-auto bg-gray-50 dark:bg-gray-800 rounded-b-sm">
             <div class="s-categories mb-3">
                 <h4 class="text-lg font-medium mb-4">Price Range</h4>
