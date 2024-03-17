@@ -1,16 +1,22 @@
 <script setup>
-    definePageMeta({
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
+definePageMeta({
     middleware: ["auth"]
-    })
-    useSeoMeta({
-        title: 'Products listing - My Amazing Site',
-        ogTitle: 'My Amazing Site',
-        description: 'This is my amazing site, let me tell you all about it.',
-        ogDescription: 'This is my amazing site, let me tell you all about it.',
-        ogImage: 'image',
-        twitterCard: 'image',
-    })
-    const listgrid = ref(1);
+})
+useSeoMeta({
+    title: 'Products listing - My Amazing Site',
+    ogTitle: 'My Amazing Site',
+    description: 'This is my amazing site, let me tell you all about it.',
+    ogDescription: 'This is my amazing site, let me tell you all about it.',
+    ogImage: 'image',
+    twitterCard: 'image',
+})
+const listgrid = ref(1);
 </script>
 <template>    
     <div class="content">

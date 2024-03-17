@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
@@ -10,6 +16,9 @@ useSeoMeta({
   ogImage: 'image',
   twitterCard: 'image',
 })
+
+
+const common = useCommonFun();
 
 // =======================================
 // Product Reviews
@@ -44,19 +53,22 @@ pdtReviews();
                     <div class="bg-gray-100 rounded-md px-4 py-5 mt-6">
                         <h4 class="text-lg font-semibold mb-3">Reviews</h4>
                         <div class="adses rounded grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-5 gap-y-5">
-                            <div v-for="(rvw,index) of pdtreviews" :key="rvw.id" class="flex max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                            <div v-for="(rvw,index) of pdtreviews" :key="rvw.id" class="flex max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-y-105 dark:bg-gray-800 dark:border-gray-700">
                                 <div class="relative">
                                     <nuxt-link :to="`/ads-details/${rvw?.product?.id}`">
                                         <img class="h-full w-40 rounded-s-md object-cover" v-if="rvw?.product?.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+rvw?.product?.picture[0].replaceAll('public','storage')" alt="Ads" />
                                         <img class="h-full w-40 rounded-s-md object-cover" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
                                     </nuxt-link>
                                 </div>
-                                <div class="px-5 py-2 w-full">
-                                    <h4 class="mb-2 text-md font-semibold tracking-tight text-gray-900 dark:text-white">
-                                        <nuxt-link :to="`/ads-details/${rvw?.product?.id}`">{{ rvw?.product?.title }}</nuxt-link>
+                                <div class="px-3 py-1.5 w-full">
+                                    <h4 class="mb-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-white">
+                                        <nuxt-link :to="`/ads-details/${rvw?.product?.id}`">{{ common.parseText(rvw?.product?.title,30) }}</nuxt-link>
                                     </h4>
-                                    <p class="text-md mb-1">
-                                        {{ rvw?.comment }}
+                                    <h5 class="mb-1 text-xs font-semibold tracking-tight text-gray-900 dark:text-white">
+                                        {{ rvw?.user?.name }}
+                                    </h5>
+                                    <p class="text-sm mb-1">
+                                        {{ common.parseText(rvw?.comment,40) }}
                                     </p>
                                     <div class="flex items-center">
                                         <svg class="w-3 h-3 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">

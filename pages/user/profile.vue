@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
@@ -12,6 +18,7 @@ useSeoMeta({
 })
 
 const auth = useAuthStore();
+const common = useCommonFun();
 definePageMeta({
   middleware: ["auth"]
 })
@@ -172,7 +179,7 @@ const Business = async() => {
                             <div class="w-1/4"></div>
                             <div class="w-2/4 flex flex-col items-center pb-10 -mt-14">
                                 <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
-                                    <img class="w-28 h-28 rounded-full p-1" v-if="auth?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="image"/>
+                                    <img class="w-28 h-28 rounded-full p-1" v-if="auth?.user?.profile_picture" :src="common?.defaultProfilePic(auth?.user?.profile_picture) == 0 ? auth?.user?.profile_picture : useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="image"/>
                                     <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="image"/>
                                 </div>
                                 <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="auth?.user?.name">{{ auth?.user?.name }}</h5>
@@ -181,7 +188,7 @@ const Business = async() => {
                             </div>
                             <div class="w-1/4 mt-4">
                                 <div class="flex" v-if="auth?.user?.id">
-                                    <button type="button" v-if="auth?.user?.business?.id" @click="Business" class="text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Upgraded Business Account</button>
+                                    <button type="button" v-if="auth?.user?.business?.id" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Upgraded Business Account</button>
                                     <button type="button" v-else @click="Business" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button>
                                 </div>
                             </div>
@@ -234,7 +241,7 @@ const Business = async() => {
                                     <textarea id="about_me" name="about_me" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..." v-model="form.about_me"></textarea>
                                 </div>
                                 <div class="flex gap-x-4">
-                                    <ButtonPrimary type="submit" class="w-auto">
+                                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                                         <div class="flex items-center justify-center gap-x-2">
                                             <div role="status" v-if="loadbtn">
                                                 <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -245,12 +252,12 @@ const Business = async() => {
                                             </div>
                                             <span>Save & Change</span>
                                         </div>
-                                    </ButtonPrimary>
-                                    <ButtonPrimary type="button" class="w-auto" @click="formEidt = false">
+                                    </button>
+                                    <button type="button" @click="formEidt = false" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-gray-200 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                                         <div class="flex items-center justify-center gap-x-2">
                                             <span>Cancel</span>
                                         </div>
-                                    </ButtonPrimary>
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -309,7 +316,7 @@ const Business = async() => {
                                 <span v-if="errors1.password_confirmation" class="text-sm text-red-500">{{ errors.password_confirmation[0] }}</span>
                             </div>
 
-                            <ButtonPrimary type="submit" class="w-auto">
+                            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                                 <div class="flex items-center justify-center gap-x-2">
                                     <div role="status" v-if="loadbtn1">
                                         <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -320,7 +327,7 @@ const Business = async() => {
                                     </div>
                                     <span>Change Password</span>
                                 </div>
-                            </ButtonPrimary>
+                            </button>
                         </form>
                     </div>
 

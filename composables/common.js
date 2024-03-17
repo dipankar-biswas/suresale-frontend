@@ -44,8 +44,14 @@ export const useCommonFun = () => {
             return productImage.style.transformOrigin = `${x}% ${y}%`;
         });
     }
+
+
+    // default Profile Pic
+    function defaultProfilePic(data){
+        return data?.indexOf("https://placehold.co");
+    }
   
-    return { convertToSlug, parseText, imageZoom }
+    return { convertToSlug, parseText, imageZoom, defaultProfilePic }
   }
 
   

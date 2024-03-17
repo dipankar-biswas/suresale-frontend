@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
@@ -63,7 +69,7 @@ const bookmarkRemove = async(id,index) => {
                 <div class="mx-auto w-full max-w-screen-2xl">
                     <div class="bg-gray-100 rounded-md px-4 py-5">
                         <div class="flex justify-between">
-                            <h4 class="text-lg font-semibold mb-3">My Orders</h4>
+                            <h4 class="text-lg font-semibold mb-3">My Wishlist</h4>
                             <div class="actions flex items-center">
                                 <button type="button" class="list p-1 rounded-s-md bg-gray-400 [&.active]:bg-gray-600" @click="listgrid = 1" :class="{ 'active' : listgrid == 1 }">
                                     <svg class="w-6 h-6 text-gray-800 [&.active]:text-white dark:text-white" :class="{ 'active' : listgrid == 1 }" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -81,11 +87,11 @@ const bookmarkRemove = async(id,index) => {
 
                     <div class="bg-gray-100 rounded-md px-4 py-5 mt-6">
                         <div class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
-                            <div v-for="(ads,index) of bookmarks" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
+                            <div v-for="(ads,index) of bookmarks" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg  dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? 'hover:scale-105' : 'flex hover:scale-y-105' ]">
                                 <div class="relative">
                                     <nuxt-link :to="`/ads-details/${ads?.id}`">
-                                        <img class="h-full" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads?.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0].replaceAll('public','storage')" alt="Ads" />
-                                        <img class="h-full" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-else src="assets/images/slider/slider-1.webp" alt="Ads" />
+                                        <img :class="[ listgrid == 1 ? 'w-72 h-48 rounded-s-md' : 'w-full h-56 rounded-t-md' ]" v-if="ads?.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0].replaceAll('public','storage')" alt="Ads" />
+                                        <img :class="[ listgrid == 1 ? 'w-72 h-48 rounded-s-md' : 'w-full h-56 rounded-t-md' ]" v-else src="assets/images/slider/slider-1.webp" alt="Ads" />
                                     </nuxt-link>
                                 </div>
                                 <div class="px-5 py-3" :class="[ listgrid == 1 ? 'w-[calc(100%-288px)]' : 'w-full' ]">

@@ -3,7 +3,7 @@ const props = defineProps(['adsItem'])
 </script>
 
 <template>
-    <div v-if="props.adsItem" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div v-if="props.adsItem" class="max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-105 dark:bg-gray-800 dark:border-gray-700">
         <div class="relative">
             <nuxt-link :to="`/ads-details/${props.adsItem?.id}`">
                 <img class="rounded-t-lg w-full h-48 object-cover" v-if="props.adsItem?.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+props.adsItem?.picture[0].replaceAll('public','storage')" alt="Ads" />

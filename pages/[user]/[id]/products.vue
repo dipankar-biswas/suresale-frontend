@@ -1,171 +1,177 @@
 <script setup>
-    useSeoMeta({
-        title: 'My Products - My Amazing Site',
-        ogTitle: 'My Amazing Site',
-        description: 'This is my amazing site, let me tell you all about it.',
-        ogDescription: 'This is my amazing site, let me tell you all about it.',
-        ogImage: 'image',
-        twitterCard: 'image',
-    })
-    const auth = useAuthStore();
-    const route = useRoute();
-    const datetime = useDateTime();
-    const common = useCommonFun();
-    const listgrid = ref(2);
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
 
-    const follower = ref(0);
-    const followersData = ref([]);
-    const followers = async() => {
-        refreshNuxtData();
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-            followersData.value = data.value.data;
-            follower.value = followersData.value.length;
-        }catch(error){
-            console.log(error);
-        }
+onMounted(() => {
+    initFlowbite();
+})
+useSeoMeta({
+    title: 'My Products - My Amazing Site',
+    ogTitle: 'My Amazing Site',
+    description: 'This is my amazing site, let me tell you all about it.',
+    ogDescription: 'This is my amazing site, let me tell you all about it.',
+    ogImage: 'image',
+    twitterCard: 'image',
+})
+const auth = useAuthStore();
+const route = useRoute();
+const datetime = useDateTime();
+const common = useCommonFun();
+const listgrid = ref(2);
+
+const follower = ref(0);
+const followersData = ref([]);
+const followers = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        followersData.value = data.value.data;
+        follower.value = followersData.value.length;
+    }catch(error){
+        console.log(error);
     }
-    followers();
+}
+followers();
 
-    const following = ref(false);
-    const followingsData = ref([]);
-    const followings = async() => {
-        refreshNuxtData();
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-            followingsData.value = data.value.data;
-            following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
-        }catch(error){
-            console.log(error);
-        }
+const following = ref(false);
+const followingsData = ref([]);
+const followings = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        followingsData.value = data.value.data;
+        following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
+    }catch(error){
+        console.log(error);
     }
-    followings();
+}
+followings();
 
-    const follow = async() => {
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
-                        method: 'POST',
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                        body: {
-                            to:route.params.id
-                        }
-                    });
-            console.log(data);
-            following.value = true;
-        }catch(error){
-            console.log(error);
-        }
+const follow = async() => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                    body: {
+                        to:route.params.id
+                    }
+                });
+        console.log(data);
+        following.value = true;
+    }catch(error){
+        console.log(error);
     }
+}
 
-    const unfollow = async() => {
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers?to=${route.params.id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-                    console.log(data);
-                    following.value = false;
-        }catch(error){
-            console.log(error);
-        }
+const unfollow = async() => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers?to=${route.params.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+                console.log(data);
+                following.value = false;
+    }catch(error){
+        console.log(error);
     }
+}
 
 
 
-    const allAds = ref([]);
-    const allAdsList = ref([]);
-    const AllAds = async() => {
-        refreshNuxtData();
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`,{
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${token.getToken}`,
-                },
-            });
-            allAds.value = data.value;
-            allAdsList.value = data.value?.product?.data;
-        }catch(error){
-            console.log('Somthing Wrong!');
-        }
+const allAds = ref([]);
+const allAdsList = ref([]);
+const AllAds = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`,{
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token.getToken}`,
+            },
+        });
+        allAds.value = data.value;
+        allAdsList.value = data.value?.product?.data;
+    }catch(error){
+        console.log('Somthing Wrong!');
     }
-    AllAds();
+}
+AllAds();
 
 
-    const loadbtn = ref(false);
-    const page = ref(1); 
-    const loadMoreBtn = async() => {
-        loadbtn.value = true;
-        page.value++;
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}?page=${page.value}`);
-            allAds.value.push(...data.value.data);
-            loadbtn.value = false;
-        }catch(error){
-            console.log('Somthing Wrong!');
-            loadbtn.value = false;
-        }
+const loadbtn = ref(false);
+const page = ref(1); 
+const loadMoreBtn = async() => {
+    loadbtn.value = true;
+    page.value++;
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}?page=${page.value}`);
+        allAds.value.push(...data.value.data);
+        loadbtn.value = false;
+    }catch(error){
+        console.log('Somthing Wrong!');
+        loadbtn.value = false;
     }
+}
 
 
-    
-    // Bookmark
-    const bookmarkAdd = async(id,index) => {
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-            if(data){
-                allAdsList.value[index].is_bookmarked = 1;
-            }
-        }catch(error){
-            console.log('Somthing Wrong!');
+
+// Bookmark
+const bookmarkAdd = async(id,index) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            allAdsList.value[index].is_bookmarked = 1;
         }
+    }catch(error){
+        console.log('Somthing Wrong!');
     }
+}
 
-    const bookmarkRemove = async(id,index) => {
-        const token = useTokenStore();
-        try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${token.getToken}`,
-                        },
-                    });
-            if(data){
-                allAdsList.value[index].is_bookmarked = 0;
-            }
-        }catch(error){
-            console.log('Somthing Wrong!');
+const bookmarkRemove = async(id,index) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            allAdsList.value[index].is_bookmarked = 0;
         }
+    }catch(error){
+        console.log('Somthing Wrong!');
     }
+}
 </script>
 <template>    
     <div class="content">
@@ -187,7 +193,6 @@
                     </div>
                     <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" />
                 </div>
-                
                 <div class="mx-auto w-full bg-whiterounded-lg dark:bg-gray-800">
                     <div class="flex">
                         <div class="w-1/4"></div>
@@ -201,7 +206,7 @@
                             <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
                         </div>
                         <div class="w-1/4 mt-4">
-                            <div class="flex" v-if="auth.user.id">
+                            <div class="flex" v-if="auth.user.id != allAds?.id">
                                 <button type="button" v-if="following == false" @click="follow()" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Follow</button>
                                 <button type="button" v-else @click="unfollow()" class="text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Unfollow</button>
                                 <button type="button" class="inline-flex text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
@@ -237,7 +242,7 @@
                 </div>
                 <div class="p-6 bg-white dark:bg-gray-800 dark:border-gray-700">
                     <div v-if="allAdsList?.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
-                        <div v-for="(ads,index) in allAdsList" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
+                        <div v-for="(ads,index) in allAdsList" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-105 dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
                             <div class="relative">
                                 <nuxt-link :to="`/ads-details/${ads.id}`">
                                     <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0]?.replaceAll('public','storage')" alt="Ads" />
@@ -248,10 +253,6 @@
                                 <div class="flex justify-between">
                                     <div class="left flex gap-x-3">
                                         <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ ads.currency?.symbol }}{{ ads.price }}</h3>
-                                        <h5 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">$11,300.00</h5>
-                                    </div>
-                                    <div class="right">
-                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Premium</span>
                                     </div>
                                 </div>
                                 <h4 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">

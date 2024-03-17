@@ -1,8 +1,13 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
-import { Modal } from 'flowbite';
 useSeoMeta({
   title: 'Reports - My Amazing Site',
   ogTitle: 'My Amazing Site',
@@ -98,7 +103,7 @@ const reportDeleteBtn = async() => {
                         <h4 class="text-lg font-semibold mb-3">Reports</h4>
                         <div v-if="reports.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-5 gap-y-5">
 
-                            <div v-for="(rprt, index) in reports" :key="index" class="bg-white max-w-full border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-3">
+                            <div v-for="(rprt, index) in reports" :key="index" class="bg-white max-w-full border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-y-105 dark:bg-gray-800 dark:border-gray-700 mb-3">
                                 <div class="px-5 py-3 w-full">
                                     <h2 class="text-md text-gray-700 font-semibold flex justify-between items-start">
                                         <span @click="ReportRead(rprt)" class="cursor-pointer">{{ rprt?.subject }}</span>

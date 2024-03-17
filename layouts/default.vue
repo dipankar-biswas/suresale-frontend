@@ -1,4 +1,7 @@
 <script setup>
+import { onMounted } from 'vue'
+import { initFlowbite } from 'flowbite'
+
 useHead({
   link: [
     {
@@ -16,6 +19,11 @@ useSeoMeta({
   ogImage: 'image',
   twitterCard: 'image',
 })
+
+// initialize components based on data attribute selectors
+onMounted(() => {
+    initFlowbite();
+})
 </script>
 <template>
   <div class="relative">
@@ -23,6 +31,7 @@ useSeoMeta({
       <slot />
     <Footer/>  
     
+    <LoginCheck></LoginCheck>
     <ToasterAlert></ToasterAlert>
   </div>
 </template>

@@ -9,18 +9,43 @@ const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        categories.value = data.value.categories;
+        categories.value = data.value?.categories?.data;
     }catch(error){
         console.log('Somthing Wrong!');
     }
 }
 getCetagories();
 
-const searchDatas = ref([]);
+
 const handelSubmit = async() => {
     refreshNuxtData();
     return navigateTo(`/search?search=${form.searchText}&category=${form.category}`);
 }
+
+
+const loadbtn = ref(false);
+const page = ref(1);
+const loadMoreCatBtn = async() => {
+    loadbtn.value = true;
+    page.value++;
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories?page=${page.value}`);
+        categories.value.push(...data.value?.categories?.data);
+        slides.value = categories.value;
+        loadbtn.value = false;
+    }catch(error){
+        loadbtn.value = false;
+        console.log(error);
+    }
+}
+
+watch(() => form.category, async (currentValue) => {
+    form.category = '';
+    loadMoreCatBtn();
+  },
+  {deep: true}
+);
+
 </script>
 <template>
     <div class="banner w-full h-60 bg-center bg-no-repeat bg-cover" style="background-image: url('/_nuxt/assets/images/slider/slider-1.webp')">
@@ -33,9 +58,10 @@ const handelSubmit = async() => {
                         <div class="flex w-full">
                             <select id="categories"
                                 v-model="form.category"
-                                class="w-fit bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                class="w-fit bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option disabled value="">Category</option>
                                 <option v-for="cat of categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                                <option value="morecat">More Categoris</option>
                             </select>
     
                             <input type="text" v-model="form.searchText" id="search-dropdown" class="block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" placeholder="Search Mockups, Logos, Design Templates...">

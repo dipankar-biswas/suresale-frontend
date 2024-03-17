@@ -1,5 +1,10 @@
 <script setup>
-import { Modal } from 'flowbite';
+import { onMounted, ref } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 
 const toaster = useToasterStore();
 const auth = useAuthStore();
@@ -343,10 +348,14 @@ const bookmarkAdd = async(id,index) => {
                     },
                 });
         if(data){
-            adsSuggestion.value[index].is_bookmarked = 1;
+            if(index == 'deto'){
+                // adsView.value?.is_bookmarked = 1;
+            }else{
+                adsSuggestion.value[index].is_bookmarked = 1;
+            }
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 
@@ -361,12 +370,97 @@ const bookmarkRemove = async(id,index) => {
                     },
                 });
         if(data){
-            adsSuggestion.value[index].is_bookmarked = 0;
+            if(index == 'deto'){
+                // adsView.value?.is_bookmarked = 0;
+            }else{
+                adsSuggestion.value[index].is_bookmarked = 0;
+            }
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
+
+
+const linkcopy = ref(false);
+const shareUrl = ref(window?.location?.origin+route.path);
+const linkcopyFun = () => {
+    const textarea = document?.querySelector('#sharelinkurl');
+    textarea.value = shareUrl.value;
+    // document?.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, 99999); 
+    document?.execCommand('copy');
+    // document.body.removeChild(textarea);
+
+    linkcopy.value = true;
+    setTimeout(() => {
+        linkcopy.value = false;
+    },2000)
+}
+
+
+
+
+// const transition = ref(0.5);
+// const gap = ref(10);
+// const currentIndex = ref(0);
+// const showNum = ref(1);
+// const slideWidht = ref();
+// const gapbad = ref();
+// const gapextplus = ref();
+// const singleWidth = ref();
+// watch(() => categories.value, async (currentValue) => {
+//     if(currentValue.length > 0){
+//     const sliderMainDiv = document?.querySelector('.slider-categories');
+//     const sliders = sliderMainDiv?.querySelector('.sliders');
+//     const sliderDivWidht = sliderMainDiv?.offsetWidth;
+//     if(window?.innerWidth > 991){
+//         showNum.value = 7;
+//     }else if(window?.innerWidth > 767){
+//         showNum.value = 4;
+//     }else if(window?.innerWidth > 575){
+//         showNum.value = 3;
+//     }else if(window?.innerWidth > 375){
+//         showNum.value = 2;
+//     }
+//     slideWidht.value = parseFloat(sliderDivWidht) / parseFloat(showNum.value);
+//     gapbad.value = (gap.value * (showNum.value - 1)) /showNum.value;
+//     gapextplus.value = gap.value - gapbad.value;
+
+//     singleWidth.value = parseFloat(slideWidht.value) - parseFloat(gapbad.value);
+//     setTimeout(() => {
+
+//         // Custom style
+//         sliders.style = `column-gap:${gap.value}px;transition: transform ${transition.value}s ease-in-out;`;
+//         const slide = sliders?.querySelectorAll('.slide');
+//         for (let el of slide) {
+//             el.style.minWidth= `${singleWidth.value}px`;
+//         }
+//     }, 500);
+//     }
+//   },
+//   {deep: true}
+// );
+
+// const next = () => {
+//         if (currentIndex.value < categories.value.length - showNum.value) {
+//         showSlide(currentIndex.value + 1);
+//     }
+// }
+
+// const prev = () => {
+//     if (currentIndex.value > 0) {
+//         showSlide(currentIndex.value - 1);
+//     }
+// }
+
+// function showSlide(index) {
+//     const sliderContent = document?.querySelector('#sliderContent');
+//     currentIndex.value = index;
+//     let translateValue = -index * (slideWidht.value + gapextplus.value);
+//     sliderContent.style.transform = 'translateX(' + translateValue + 'px)';
+// }
 
 </script>
 <template>    
@@ -407,11 +501,12 @@ const bookmarkRemove = async(id,index) => {
                         
                         <div class="w-9/12">
                             <div class="feature-image overflow-hidden rounded-lg">
-                                <img class="rounded-lg w-full h-auto object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
-                                <img class="rounded-lg w-full h-auto object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-else src="assets/images/dummy-image.jpg" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                <img class="rounded-lg w-full h-96 object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                <img class="rounded-lg w-full h-96 object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-else src="assets/images/dummy-image.jpg" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
                             </div>
                         </div>
                         <div class="w-3/12">
+
                             <div class="slides flex flex-col gap-y-3">
                                 <div v-for="(image,index) in adsView?.picture" :key="index" class="item border border-cyan-500 rounded-lg">
                                     <img class="rounded-lg w-full h-28 object-cover" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image?.replaceAll('public','storage')" alt="Ads" />
@@ -444,7 +539,7 @@ const bookmarkRemove = async(id,index) => {
                             <div class="price text-4xl font-semibold mb-4">{{ adsView?.currency?.symbol }}{{ adsView?.price }}</div>
     
                             <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
-                            <div class="actions mb-4">
+                            <div class="actions flex flex-wrap items-center mb-4">
                                 <a v-if="adsView?.user?.mobile != null" :href="`tel:${ adsView?.user?.mobile }`" class="inline-flex text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -461,15 +556,28 @@ const bookmarkRemove = async(id,index) => {
                                         <span>Contact Seller</span>
                                     </div>
                                 </a>
-                                <button type="button" class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
-                                    <div class="flex items-center gap-x-1">
-                                        <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M7.8 2c-.5 0-1 .2-1.3.6A2 2 0 0 0 6 3.9V21a1 1 0 0 0 1.6.8l4.4-3.5 4.4 3.5A1 1 0 0 0 18 21V3.9c0-.5-.2-1-.5-1.3-.4-.4-.8-.6-1.3-.6H7.8Z"/>
-                                        </svg>
-                                        <span>Save</span>
-                                    </div>
-                                </button>
-                                <button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                <div v-if="auth?.user?.id">
+                                    <button type="button" v-if="adsView?.is_bookmarked == 1" @click="bookmarkRemove(adsView?.id,'deto')" class="text-gray-900 bg-gray-200 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Saved</button>
+                                    <button type="button" v-else @click="bookmarkAdd(adsView?.id,'deto')" class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                        <div class="flex items-center gap-x-1">
+                                            <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7.8 2c-.5 0-1 .2-1.3.6A2 2 0 0 0 6 3.9V21a1 1 0 0 0 1.6.8l4.4-3.5 4.4 3.5A1 1 0 0 0 18 21V3.9c0-.5-.2-1-.5-1.3-.4-.4-.8-.6-1.3-.6H7.8Z"/>
+                                            </svg>
+                                            <span>Save</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div v-else>
+                                    <button type="button" data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                        <div class="flex items-center gap-x-1">
+                                            <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M7.8 2c-.5 0-1 .2-1.3.6A2 2 0 0 0 6 3.9V21a1 1 0 0 0 1.6.8l4.4-3.5 4.4 3.5A1 1 0 0 0 18 21V3.9c0-.5-.2-1-.5-1.3-.4-.4-.8-.6-1.3-.6H7.8Z"/>
+                                            </svg>
+                                            <span>Save</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <button data-modal-target="sharelink-modal" data-modal-toggle="sharelink-modal" type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M17.5 3A3.5 3.5 0 0 0 14 7L8.1 9.8A3.5 3.5 0 0 0 2 12a3.5 3.5 0 0 0 6.1 2.3l6 2.7-.1.5a3.5 3.5 0 1 0 1-2.3l-6-2.7a3.5 3.5 0 0 0 0-1L15 9a3.5 3.5 0 0 0 6-2.4c0-2-1.6-3.5-3.5-3.5Z"/>
@@ -479,7 +587,7 @@ const bookmarkRemove = async(id,index) => {
                                 </button>
                             </div>
                             <figcaption class="flex items-center justify-start mt-6 mb-5 space-x-3 rtl:space-x-reverse">
-                                <img class="w-12 h-12 rounded-full" v-if="adsView?.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+adsView?.user?.profile_picture" alt="profile picture">
+                                <img class="w-12 h-12 rounded-full" v-if="adsView?.user?.profile_picture" :src="common?.defaultProfilePic(adsView?.user?.profile_picture) == 0 ? adsView?.user?.profile_picture : useRuntimeConfig().public.imageUrl+adsView?.user?.profile_picture" alt="profile picture">
                                 <div class="">
                                     <div class="font-medium text-gray-900 dark:text-white">
                                         <nuxt-link :to="`/${adsView?.user?.name?.replaceAll(' ','-')}/${adsView?.user?.id}/products`">{{ adsView?.user?.name }}</nuxt-link>
@@ -489,7 +597,8 @@ const bookmarkRemove = async(id,index) => {
                                             <svg class="w-3 h-3 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
                                                 <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
                                             </svg>
-                                            <span>5.0</span>
+                                            <span v-if="adsView?.reviews">{{ adsView?.reviews[0]?.average_rating }}</span>
+                                            <span v-else>0</span>
                                         </div>
                                         <div data-modal-target="reviews-modal" data-modal-toggle="reviews-modal" class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-x-1 cursor-pointer hover:text-gray-900">
                                             <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -510,7 +619,7 @@ const bookmarkRemove = async(id,index) => {
                                         <span>Start Chat</span>
                                     </div>
                                 </button>
-                                <button v-else type="button" data-modal-target="start-chat-modal" data-modal-toggle="start-chat-modal" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                <button v-else type="button" data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M4 3a1 1 0 0 0-1 1v8c0 .6.4 1 1 1h1v2a1 1 0 0 0 1.7.7L9.4 13H15c.6 0 1-.4 1-1V4c0-.6-.4-1-1-1H4Z" clip-rule="evenodd"/>
@@ -519,7 +628,15 @@ const bookmarkRemove = async(id,index) => {
                                         <span>Start Chat</span>
                                     </div>
                                 </button>
-                                <button type="button" data-modal-target="report-modal" data-modal-toggle="report-modal" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                <button type="button" v-if="auth?.user?.id" data-modal-target="report-modal" data-modal-toggle="report-modal" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                    <div class="flex items-center gap-x-1">
+                                        <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 10a2.5 2.5 0 1 1 5 .2 2.4 2.4 0 0 1-2.5 2.4V14m0 3h0m9-5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                        </svg>
+                                        <span>Report</span>
+                                    </div>
+                                </button>
+                                <button type="button" v-else data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                                     <div class="flex items-center gap-x-1">
                                         <svg class="w-5 h-5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 10a2.5 2.5 0 1 1 5 .2 2.4 2.4 0 0 1-2.5 2.4V14m0 3h0m9-5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -529,7 +646,7 @@ const bookmarkRemove = async(id,index) => {
                                 </button>
                             </div>
     
-                            <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
+                            <!-- <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
     
                             <h4 class="text-md font-semibold mb-2">Share</h4>
                             <div class="text-start flex gap-x-3">
@@ -560,7 +677,7 @@ const bookmarkRemove = async(id,index) => {
                                             clip-rule="evenodd" />
                                     </svg>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -572,45 +689,38 @@ const bookmarkRemove = async(id,index) => {
                             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <tbody>
                                     <tr class="border-gray-200 dark:border-gray-700 flex">
-                                        <th scope="row" class="px-6 py-4 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <th scope="row" class="px-6 py-2 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             Description : 
                                         </th>
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-2">
                                             {{ adsView?.description }}
                                         </td>
                                     </tr>
+                                    {{ adsView }}
                                     <tr class="border-gray-200 dark:border-gray-700 flex">
-                                        <th scope="row" class="px-6 py-4 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <th scope="row" class="px-6 py-2 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             Category : 
                                         </th>
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-2">
                                             {{ adsView?.category?.name }}
                                         </td>
                                     </tr>
                                     <tr class="border-gray-200 dark:border-gray-700 flex">
-                                        <th scope="row" class="px-6 py-4 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            Model : 
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            Apple 15 Pro Max
-                                        </td>
-                                    </tr>
-                                    <tr class="border-gray-200 dark:border-gray-700 flex">
-                                        <th scope="row" class="px-6 py-4 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <th scope="row" class="px-6 py-2 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             Condition : 
                                         </th>
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-2">
                                             {{ adsView?.condition?.name }}
                                         </td>
                                     </tr>
-                                    <tr class="border-gray-200 dark:border-gray-700 flex">
+                                    <!-- <tr class="border-gray-200 dark:border-gray-700 flex">
                                         <td class="px-6 py-4 w-full flex items-center justify-center gap-x-2" colspan="2">
                                             <span class="font-medium text-gray-900">Show More Details</span>
                                             <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
                                             </svg>
                                         </td>
-                                    </tr>
+                                    </tr> -->
                                 </tbody>
                             </table>
                         </div>
@@ -667,7 +777,6 @@ const bookmarkRemove = async(id,index) => {
 
     <!-- Popular Searches -->
     <HomePopularSearches></HomePopularSearches>
-    
 
 
     <!-- Review modal -->
@@ -793,26 +902,6 @@ const bookmarkRemove = async(id,index) => {
     </div>
     
     <ChatSingle v-if="auth?.user?.id" :chathideshow="chathideshow" :toUser="toUser" :getmessage="getmessage" :chatslistlastid="chatslistlastid" @chathide="chathideFun($event)" @loadmoremsgid="loadMoreMsgFun($event)"></ChatSingle>
-    
-    <div id="start-chat-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="start-chat-modal">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-                <div class="p-4 md:p-5 text-center">
-                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                    </svg>
-                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Please Login First ! Try agian.</h3>
-                    <button data-modal-hide="start-chat-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Ok</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <!-- Report modal -->
@@ -851,6 +940,53 @@ const bookmarkRemove = async(id,index) => {
                     </button>
                 </form>
 
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Share Link modal -->
+    <div id="sharelink-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-lg max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5">
+                    <h3 class="text-lg text-gray-500 dark:text-gray-400">
+                        Share course
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-700 dark:hover:text-white" data-modal-toggle="sharelink-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="px-4 pb-4 md:px-5 md:pb-5">
+                    <label for="sharelinkurl" class="text-sm font-medium text-gray-900 dark:text-white mb-2 block">Share the course link below with your friends:</label>
+                    <div class="relative mb-4">
+                        <input id="sharelinkurl" type="text" class="col-span-6 bg-gray-50 border border-gray-300 text-gray-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" v-model="shareUrl" readonly>
+                        <button @click="linkcopyFun" data-tooltip-target="tooltip-course-url" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 inline-flex items-center justify-center">
+                            <span v-if="!linkcopy" id="default-icon-course-url">
+                                <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                                    <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
+                                </svg>
+                            </span>
+                            <span v-else id="success-icon-course-url" class="inline-flex items-center">
+                                <svg class="w-3.5 h-3.5 text-blue-700 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                                </svg>
+                            </span>
+                        </button>
+                        <div id="tooltip-course-url" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                            <span v-if="!linkcopy" id="default-tooltip-message-course-url">Copy to clipboard</span>
+                            <span v-else id="success-tooltip-message-course-url">Copied!</span>
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+                    </div>
+                    <button type="button" data-modal-hide="sharelink-modal" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Close</button>
+                </div>
             </div>
         </div>
     </div>

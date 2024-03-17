@@ -1,22 +1,38 @@
 <script setup>
+import { onMounted } from 'vue';
+
 const common = useCommonFun();
 
 
+const totalcat = ref(0);
 const categories = ref([]);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        categories.value = data.value.categories;
+        totalcat.value = data.value?.categories;
+        categories.value = data.value?.categories?.data;
     }catch(error){
         console.log('Somthing Wrong!');
     }
 }
 getCetagories();
 
-// if(categories.value.length > 0)
-    const sliderDivWidht = document?.querySelector('.slider-width')?.offsetWidth;
-    const showNum = ref(1);
+
+const slides = ref(0);
+const transition = ref(0.5);
+const gap = ref(10);
+const currentIndex = ref(0);
+const showNum = ref(1);
+const slideWidht = ref();
+const gapbad = ref();
+const gapextplus = ref();
+const singleWidth = ref();
+watch(() => categories.value, async (currentValue) => {
+    if(currentValue.length > 0){
+    const sliderMainDiv = document?.querySelector('.slider-categories');
+    const sliders = sliderMainDiv?.querySelector('.sliders');
+    const sliderDivWidht = sliderMainDiv?.offsetWidth;
     if(window?.innerWidth > 991){
         showNum.value = 7;
     }else if(window?.innerWidth > 767){
@@ -26,37 +42,59 @@ getCetagories();
     }else if(window?.innerWidth > 375){
         showNum.value = 2;
     }
-    const gap = ref(10);
-    const currentIndex = ref(0);
-    const slideWidht = ref(parseFloat(sliderDivWidht) / parseFloat(showNum.value));
-    const gapbad = ref((gap.value * (showNum.value - 1)) /showNum.value);
-    const gapextplus = ref(gap.value - gapbad.value);
-    
-    const divWidth = ref(sliderDivWidht);
-    const singleWidth = ref(parseFloat(slideWidht.value) - parseFloat(gapbad.value));
+    slideWidht.value = parseFloat(sliderDivWidht) / parseFloat(showNum.value);
+    gapbad.value = (gap.value * (showNum.value - 1)) / showNum.value;
+    gapextplus.value = gap.value - gapbad.value;
 
-
-    const next = () => {
-        if (currentIndex.value < categories.value.length - showNum.value) {
-            showSlide(currentIndex.value + 1);
+    singleWidth.value = parseFloat(slideWidht.value) - parseFloat(gapbad.value);
+    setTimeout(() => {
+        // Custom style
+        sliders.style = `column-gap:${gap.value}px;transition: transform ${transition.value}s ease-in-out;`;
+        slides.value = sliders?.querySelectorAll('.slide');
+        for (let el of slides.value) {
+            el.style.minWidth= `${singleWidth.value}px`;
         }
+    }, 500);
     }
-    
-    const prev = () => {
-        if (currentIndex.value > 0) {
-            showSlide(currentIndex.value - 1);
-        }
+  },
+  {deep: true}
+);
+
+const next = () => {
+        if (currentIndex.value < slides.value.length - showNum.value) {
+        showSlide(currentIndex.value + 1);
     }
-    
-    function showSlide(index) {
-        const sliderContent = document?.querySelector('#sliderContent');
-        currentIndex.value = index;
-        let translateValue = -index * (slideWidht.value + gapextplus.value);
-        sliderContent.style.transform = 'translateX(' + translateValue + 'px)';
+}
+
+const prev = () => {
+    if (currentIndex.value > 0) {
+        showSlide(currentIndex.value - 1);
     }
-// )
+}
+
+function showSlide(index) {
+    const sliderContent = document?.querySelector('#sliderContent');
+    currentIndex.value = index;
+    let translateValue = -index * (slideWidht.value + gapextplus.value);
+    sliderContent.style.transform = 'translateX(' + translateValue + 'px)';
+}
 
 
+const loadbtn = ref(false);
+const page = ref(1);
+const loadMoreCatBtn = async() => {
+    loadbtn.value = true;
+    page.value++;
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories?page=${page.value}`);
+        categories.value.push(...data.value?.categories?.data);
+        slides.value = categories.value;
+        loadbtn.value = false;
+    }catch(error){
+        loadbtn.value = false;
+        console.log(error);
+    }
+}
 
 </script>
 <template>
@@ -66,10 +104,16 @@ getCetagories();
             <h5>See All</h5>
         </div>
         <div class="relative">
-            <div class="slider-container slider-width flex overflow-hidden" :style="`width: ${divWidth}px;`">
-                <div v-if="singleWidth" class="slider-content flex" id="sliderContent" :style="`column-gap:${gap}px;transition: transform 0.5s ease-in-out;`">
-                    <div v-for="(cat,index) in categories" :key="index" draggable class="slide h-44 overflow-hidden flex justify-center items-center text-center bg-gray-50" :style="`min-width: ${singleWidth}px;`">
-                        <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center">
+            <div class="slider-container slider-categories flex overflow-hidden">
+                <div class="sliders flex" id="sliderContent">
+                    <div class="slide w-full h-44 flex justify-center items-center text-center">
+                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                            <h4 class="title font-semibold">All Categories</h4>
+                            <p class="text-gray-400 text-sm">{{ categories.length }}</p>
+                        </div>
+                    </div>
+                    <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full h-44 flex justify-center items-center text-center">
+                        <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
                             <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
                                 <img src="assets/images/categories/thumb-sub-cat-tops.webp" alt="Image" class="w-full h-full object-cover">
                             </div>
@@ -77,10 +121,21 @@ getCetagories();
                             <p class="text-gray-400 text-sm">{{ cat.product_count }} ads</p>
                         </nuxt-link>
                     </div>
+                    <div @click="loadMoreCatBtn" class="slide w-full h-44 flex justify-center items-center text-center">
+                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                            <h4 class="title font-semibold">More Categories</h4>
+                            <p class="text-gray-400 text-sm">{{ totalcat.total }} Items</p>
+                            <span class="mt-2">
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
     
-            <div class="arrow" v-if="categories.length > showNum">
+            <div class="arrow">
                 <span @click="prev()" class="prev absolute left-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>

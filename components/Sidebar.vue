@@ -19,7 +19,7 @@ const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        categories.value = data.value.categories;
+        categories.value = data.value?.categories?.data;
     }catch(error){
         console.log('Somthing Wrong!');
     }
@@ -54,6 +54,22 @@ emit('stateChecked',stateChecked);
 emit('stateChecked',stateChecked);
 const handelPriceFilter = () => {
     emit('priceFilter',price);
+}
+
+
+const loadbtn = ref(false);
+const page = ref(1);
+const loadMoreCatBtn = async() => {
+    loadbtn.value = true;
+    page.value++;
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories?page=${page.value}`);
+        categories.value.push(...data.value?.categories?.data);
+        loadbtn.value = false;
+    }catch(error){
+        loadbtn.value = false;
+        console.log(error);
+    }
 }
 
 </script>
@@ -106,6 +122,11 @@ const handelPriceFilter = () => {
                         </div>
                     </li>
                     
+                    <li>
+                        <div @click="loadMoreCatBtn" class="flex items-center mt-3 mb-2">
+                            <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">More Categories</label>
+                        </div>
+                    </li>
                 </ul>
                 <h4 class="text-md font-medium mb-3 mt-3 ps-5">Condition</h4>
                 <ul class="space-y-2 font-normal ps-6">
@@ -170,11 +191,6 @@ const handelPriceFilter = () => {
                         </div>
                     </li>
                 </ul>
-            </div>
-            <div class="ads mt-10">
-                <div class="image rounded-lg w-full h-64 overflow-hidden">
-                    <img src="assets/images/slider/slider-1.webp" alt="Product Title" class="w-full h-full">
-                </div>
             </div>
         </div>
     </aside>

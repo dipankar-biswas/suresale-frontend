@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })

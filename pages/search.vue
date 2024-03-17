@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 useSeoMeta({
   title: 'Search Products - My Amazing Site',
   ogTitle: 'My Amazing Site',
@@ -105,6 +111,30 @@ const getSearchData = async() => {
     }
 }
 getSearchData();
+
+
+const popularsearch = ref();
+const popularSearchFun = (event) => {
+    popularsearch.value = event
+}
+// Popular Search
+watch(() => popularsearch.value, async (currentValue) => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/search?search=${currentValue}&category=`,{
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token.getToken}`,
+            },
+        });
+        searchDatas.value = data.value.data;
+    }catch(error){
+        console.log(error);
+    }
+  },
+  {deep: true}
+);
 
 
 const loadbtn = ref(false);
@@ -255,7 +285,7 @@ const bookmarkRemove = async(id,index) => {
                                 </div>
                             </div>
 
-                            <div class="flex justify-center mt-8">
+                            <!-- <div class="flex justify-center mt-8">
                                 <button @click="loadMoreBtn" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-600 focus:outline-none bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                                     <div class="flex items-center justify-center gap-x-2">
                                         <div role="status" v-if="loadbtn">
@@ -268,7 +298,7 @@ const bookmarkRemove = async(id,index) => {
                                         <span>Load More</span>
                                     </div>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -277,7 +307,7 @@ const bookmarkRemove = async(id,index) => {
     </div>
 
     <!-- Popular Searches -->
-    <HomePopularSearches></HomePopularSearches>
+    <HomePopularSearches @popularSearch="popularSearchFun($event)"></HomePopularSearches>
     
     
 </template>

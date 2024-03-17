@@ -1,4 +1,5 @@
 <script setup>
+const emit = defineEmits(['popularSearch']);
 const searches = ref([]);
 const getMostSearch = async() => {
     refreshNuxtData();
@@ -11,6 +12,11 @@ const getMostSearch = async() => {
     }
 }
 getMostSearch();
+
+const handelSubmit = async(searchText) => {
+    emit('popularSearch',searchText);
+    return navigateTo(`/search?search=${searchText}&category=`);
+}
 </script>
 <template>
     <div class="mx-auto w-full max-w-screen-2xl px-4 py-2">
@@ -22,7 +28,7 @@ getMostSearch();
                 <div v-if="pending">
                     Loading ...
                 </div>
-                <a v-else v-for="search in searches" :key="search.id" href="#" class="py-2.5 px-5 flex items-center justify-center text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">{{ search.name }}</a>
+                <div v-else v-for="search in searches" :key="search.id" @click="handelSubmit(search.name)" class="py-2.5 px-5 flex items-center justify-center text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 cursor-pointer">{{ search.name }}</div>
                 <!-- <a href="#" class="py-2.5 px-5 me-2 mb-2 text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Search Item</a>
                 <a href="#" class="py-2.5 px-5 me-2 mb-2 text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Search Item</a>
                 <a href="#" class="py-2.5 px-5 me-2 mb-2 text-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border-2 border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Search Item</a>

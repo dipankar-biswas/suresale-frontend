@@ -1,4 +1,11 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
+
 useSeoMeta({
   title: 'Suresale - My Amazing Site',
   ogTitle: 'My Amazing Site',

@@ -1,4 +1,10 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
@@ -14,10 +20,12 @@ useSeoMeta({
 const toaster = useToasterStore();
 const auth = useAuthStore();
 const route = useRoute();
+const common = useCommonFun();
 
 const form = reactive({
     title: null,
     price: null,
+    negotiable:0,
     description: null,
     category: null,
     stock: null,
@@ -187,6 +195,7 @@ const handelSubmit = async() => {
     formdata.append("type_id", route.params.type);
     formdata.append("title", form.title);
     formdata.append("price", form.price);
+    formdata.append("negotiable", form.negotiable == true ? 1 : 0);
     formdata.append("description", form.description);
     formdata.append("category_id", route.params.id);
     formdata.append("stock_amount", form.stock);
@@ -307,14 +316,14 @@ const imageMouseMove = (e) => {
                                 <span v-if="errors.price" class="text-sm text-red-500">{{ errors.price[0] }}</span>
                             </div>
                             <div class="mb-3">
-                                <textarea id="description" name="description" v-model="form.description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description"></textarea>
-                            </div>
-                            <div class="mb-3">
                                 <label class="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" value="" class="sr-only peer">
+                                    <input type="checkbox" value="1" v-model="form.negotiable" class="sr-only peer">
                                     <div class="relative w-8 h-4 bg-gray-400 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-3.5 after:h-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                     <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Price navigation</span>
                                 </label>
+                            </div>
+                            <div class="mb-3">
+                                <textarea id="description" name="description" v-model="form.description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description"></textarea>
                             </div>
                             <div>
                                 <div class="mb-2" v-for="(field,index) in fields" :key="field.id">
@@ -423,9 +432,10 @@ const imageMouseMove = (e) => {
                                         <span v-else>Title</span>
                                     </h2>
                                     <h4 class="text-lg font-semibold mb-3">
-                                        <span v-if="form.price != null && form.price != ''">Tk.{{ form.price }}</span>
+                                        <span v-if="form.price != null && form.price != ''">Tk.{{ form.price }} <span v-if="form.negotiable != 0 && form.negotiable != ''" class="text-sm font-semibold mb-3">( Ask Price )</span></span>
                                         <span v-else>Price</span>
                                     </h4>
+                                    
                                     <p class="text-sm font-normal mb-4">
                                         <span v-if="form.description != null && form.description != ''">{{ form.description }}</span>
                                         <span v-else>Description</span>
@@ -457,7 +467,7 @@ const imageMouseMove = (e) => {
                                         <hr class="h-px my-4 bg-gray-300 border-0 dark:bg-gray-700">
                                         <div class="flex items-center gap-x-4 pb-10">
                                             <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg relative z-10">
-                                                <img class="w-16 h-16 rounded-full p-1" v-if="auth.user?.profile_picture" :src="useRuntimeConfig().public.imageUrl+auth.user?.profile_picture" alt="Bonnie image"/>
+                                                <img class="w-16 h-16 rounded-full p-1" v-if="auth.user?.profile_picture" :src="common?.defaultProfilePic(auth?.user?.profile_picture) == 0 ? auth?.user?.profile_picture : useRuntimeConfig().public.imageUrl+auth.user?.profile_picture" alt="Bonnie image"/>
                                             </div>
                                             <div class="flex flex-col">
                                                 <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ auth.user?.name }}</h5>

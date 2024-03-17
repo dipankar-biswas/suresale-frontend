@@ -1,4 +1,12 @@
 <script setup>
+import { onMounted, ref } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
+
+
 useSeoMeta({
   title: 'Email Verification - My Amazing Site',
   ogTitle: 'My Amazing Site',

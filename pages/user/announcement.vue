@@ -1,8 +1,13 @@
 <script setup>
+import { onMounted } from 'vue'
+import { Modal, initFlowbite } from 'flowbite';
+
+onMounted(() => {
+    initFlowbite();
+})
 definePageMeta({
   middleware: ["auth"]
 })
-import { Modal } from 'flowbite';
 useSeoMeta({
   title: 'Annoucement - My Amazing Site',
   ogTitle: 'My Amazing Site',
@@ -78,7 +83,7 @@ const announRead = async(announ,seenValue) => {
                         <h4 class="text-lg font-semibold mb-3">Announcement</h4>
                         <div class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-5 gap-y-5">
                             
-                            <div v-for="(announ, index) in announcement"  class="max-w-full border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-3" :class="announ.seen == 0 ? 'bg-blue-50' : 'bg-white'">
+                            <div v-for="(announ, index) in announcement"  class="max-w-full border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-y-105 dark:bg-gray-800 dark:border-gray-700 mb-3" :class="announ.seen == 0 ? 'bg-blue-50' : 'bg-white'">
                                 <div @click="announRead(announ,announ?.seen)" class="px-5 py-3 w-full cursor-pointer">
                                     <h2 class="text-md text-gray-700" :class="announ.seen == 0 ? 'font-bold' : 'font-semibold'">{{ announ.subject }}</h2>
                                     <p class="text-sm mb-2" :class="announ.seen == 0 ? 'font-semibold' : 'font-normal'">{{ common.parseText(announ.message,120) }}</p>
