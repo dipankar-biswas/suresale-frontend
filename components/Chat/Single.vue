@@ -45,7 +45,7 @@ const handelSubmit = async() => {
         if(data){
             loadbtn.value = false;
             msgid.value = props.getmessage[props.getmessage.length - 1].id + 1;
-            let newChatMsg = ''
+            let newChatMsg = '';
             newChatMsg += `<div>
                             <div class="chat right flex flex-row-reverse justify-end gap-x-3 mb-5">
                                 <div class="avatar flex">

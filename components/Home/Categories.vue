@@ -1,8 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
-
 const common = useCommonFun();
-
 
 const totalcat = ref(0);
 const categories = ref([]);
@@ -19,7 +16,9 @@ const getCetagories = async() => {
 getCetagories();
 
 
+const indexCount = ref(0);
 const slides = ref(0);
+const slidesLenght = ref(0);
 const transition = ref(0.5);
 const gap = ref(10);
 const currentIndex = ref(0);
@@ -51,6 +50,7 @@ watch(() => categories.value, async (currentValue) => {
         // Custom style
         sliders.style = `column-gap:${gap.value}px;transition: transform ${transition.value}s ease-in-out;`;
         slides.value = sliders?.querySelectorAll('.slide');
+        slidesLenght.value = slides.value.length;
         for (let el of slides.value) {
             el.style.minWidth= `${singleWidth.value}px`;
         }
@@ -61,7 +61,8 @@ watch(() => categories.value, async (currentValue) => {
 );
 
 const next = () => {
-        if (currentIndex.value < slides.value.length - showNum.value) {
+        if (currentIndex.value < slidesLenght.value - showNum.value) {
+        indexCount++;
         showSlide(currentIndex.value + 1);
     }
 }
@@ -83,13 +84,30 @@ function showSlide(index) {
 const loadbtn = ref(false);
 const page = ref(1);
 const loadMoreCatBtn = async() => {
+    let sliderData = document?.querySelector('.slider-categories .sliders');
     loadbtn.value = true;
     page.value++;
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories?page=${page.value}`);
-        categories.value.push(...data.value?.categories?.data);
-        slides.value = categories.value;
-        loadbtn.value = false;
+        // categories.value.push(...data.value?.categories?.data);
+        if(data){
+            slidesLenght.value = slidesLenght.value + data.value?.categories?.data.length;
+            let newSlide = ''
+            for(let i = 0; i<data.value?.categories?.data.length; i++) {
+                newSlide += `
+                        <div draggable class="slide w-full h-44 flex justify-center items-center text-center" style="min-width:${singleWidth.value?.toFixed(3)}px;">
+                            <nuxt-link :to="/category/${data.value?.categories?.data[i]?.id}" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                                <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
+                                    <img src="" alt="Image" class="w-full h-full object-cover">
+                                </div>
+                                <h4 class="title font-semibold">${ data.value?.categories?.data[i]?.name }</h4>
+                                <p class="text-gray-400 text-sm">${ data.value?.categories?.data[i]?.product_count } ads</p>
+                            </nuxt-link>
+                        </div>`;
+                sliderData.innerHTML = sliderData.innerHTML + newSlide;
+            }
+            loadbtn.value = false;
+        }
     }catch(error){
         loadbtn.value = false;
         console.log(error);
@@ -121,7 +139,7 @@ const loadMoreCatBtn = async() => {
                             <p class="text-gray-400 text-sm">{{ cat.product_count }} ads</p>
                         </nuxt-link>
                     </div>
-                    <div @click="loadMoreCatBtn" class="slide w-full h-44 flex justify-center items-center text-center">
+                    <!-- <div @click="loadMoreCatBtn" class="slide w-full h-44 flex justify-center items-center text-center">
                         <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
                             <h4 class="title font-semibold">More Categories</h4>
                             <p class="text-gray-400 text-sm">{{ totalcat.total }} Items</p>
@@ -131,7 +149,7 @@ const loadMoreCatBtn = async() => {
                                 </svg>
                             </span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
     
@@ -141,7 +159,12 @@ const loadMoreCatBtn = async() => {
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
                     </svg>
                 </span>
-                <span @click="next()" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
+                <span v-if="slidesLenght != indexCount" @click="next()" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                    </svg>
+                </span>
+                <span v-else @click="loadMoreCatBtn" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
                     </svg>
