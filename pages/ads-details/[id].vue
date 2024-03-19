@@ -696,7 +696,7 @@ const linkcopyFun = () => {
                                             {{ adsView?.description }}
                                         </td>
                                     </tr>
-                                    {{ adsView }}
+                                    <!-- {{ adsView }} -->
                                     <tr class="border-gray-200 dark:border-gray-700 flex">
                                         <th scope="row" class="px-6 py-2 w-28 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             Category : 
