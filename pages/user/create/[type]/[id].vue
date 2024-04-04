@@ -2,12 +2,15 @@
 import { onMounted } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
-onMounted(() => {
-    initFlowbite();
-})
+
 definePageMeta({
   middleware: ["auth"]
 })
+
+onMounted(() => {
+    initFlowbite();
+})
+
 useSeoMeta({
   title: 'Ads Create - My Amazing Site',
   ogTitle: 'My Amazing Site',
@@ -29,7 +32,6 @@ const form = reactive({
     description: null,
     category: null,
     stock: null,
-    condition: null,
     location: null,
     tags: [],
     image: [],
@@ -71,17 +73,6 @@ const categoryFields = async() => {
 categoryFields();
 
 
-const conditions = ref([]);
-const getConditions = async() => {
-    refreshNuxtData();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/conditions`);
-        conditions.value = data.value;
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-getConditions();
 
 
 const galleryData = ref([]);
@@ -101,16 +92,7 @@ const onChange = (event) => {
 
 }
 const removeImage = (index) => {
-    
-    console.log('view');
-    console.log(form.image);
-    console.log(galleryData.value);
-
     galleryData.value = galleryData.value?.filter((item,ind) => ind !== index);
-
-    console.log('result');
-    console.log(form.image);
-    console.log(galleryData.value);
 }
 
 const open = ref(false);
@@ -164,16 +146,6 @@ getCetagories();
 
 const errors = ref([]);
 const loadbtn = ref(false);
-const condition_name = ref(null);
-
-watch(() => form.condition, async (currentValue) => {
-    if(currentValue > 0){
-        condition_name.value = conditions.value.find(item => item?.id === currentValue)?.name;
-    }
-  },
-  {deep: true}
-);
-
 
 const handelSubmit = async() => {
     try{
@@ -199,7 +171,6 @@ const handelSubmit = async() => {
     formdata.append("description", form.description);
     formdata.append("category_id", route.params.id);
     formdata.append("stock_amount", form.stock);
-    formdata.append("condition_id", form.condition);
     formdata.append("location", form.location);
     formdata.append("currency_id", form.currency_id);
     formdata.append("lat", form.lat);
@@ -230,7 +201,6 @@ const handelSubmit = async() => {
             form.price = null;
             form.description = null;
             form.stock = null;
-            form.condition = null;
             form.location = null;
             form.tags = [];
             todos.value = [];
@@ -327,23 +297,30 @@ const imageMouseMove = (e) => {
                             </div>
                             <div>
                                 <div class="mb-2" v-for="(field,index) in fields" :key="field.id">
-                                    <input type="text" :name="field.name" v-model="form.fields.key1[index].value" id="default-input" :placeholder="field.name[0]?.toUpperCase() + field.name?.slice(1)"
+
+                                    <select v-if="field?.validation?.split('|')?.find((element) => { return element?.split(':')[0] === 'in' })" :name="field.name" v-model="form.fields.key1[index].value" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                        <option value="null" disabled>{{field?.validation.split('|')?.find((element) => { return element === 'required' }) !== undefined ? `${(field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ')} *` : `${(field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ')}`}}</option>
+                                        <option v-for="cond in ((field?.validation.split('|')?.find((element) => { return element?.split(':')[0] === 'in' }))?.split(':')[1])?.split(',')" :value="cond">{{ cond == 0 ? 'No' : cond == 1 ? 'Yes' : cond[0]?.toUpperCase() + cond?.slice(1)?.replace('_',' ') }}</option>
+                                    </select>
+
+
+                                    <input v-else
+                                        :type="field?.validation?.split('|')?.find((element) => element === 'integer' || element === 'numeric') ? 'number' : 'text'" 
+                                        :name="field.name" 
+                                        v-model="form.fields.key1[index].value" 
+                                        id="default-input" 
+                                        :placeholder="field?.validation?.split('|')?.find((element) => element === 'required') !== undefined ? `${(field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ')} *` : `${(field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ')}`"
+                                        :min="(field?.validation?.split('|')?.find((element) => element?.split(':')[0] === 'min'))?.split(':')[1]" 
+                                        :max="(field?.validation?.split('|')?.find((element) => element?.split(':')[0] === 'max'))?.split(':')[1]" 
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                
+                                
                                 </div>
                             </div>
                             <div class="mb-2">
                                 <input type="text" name="stock" v-model="form.stock" id="default-input" placeholder="Stock"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <span v-if="errors.stock_amount" class="text-sm text-red-500">{{ errors.stock_amount[0] }}</span>
-                            </div>
-                            <div class="mb-3">
-                                <select id="condition"
-                                    v-model="form.condition"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option disabled value="null">Condition</option>
-                                    <option v-for="cond in conditions" :key="cond.id" :value="cond.id">{{ cond.name }}</option>
-                                </select>
-                                <span v-if="errors.condition_id" class="text-sm text-red-500">{{ errors.condition_id[0] }}</span>
                             </div>
 
                             <div class="mb-3">
@@ -414,11 +391,11 @@ const imageMouseMove = (e) => {
                             <div v-else class="mx-auto w-full max-w-1/2">
                                 <div class="grid gap-4">
                                     <div class="rounded-lg overflow-hidden">
-                                        <img class="h-auto max-w-full rounded-lg transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" :src="showImage" alt="Image"  :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                        <img class="h-80 w-full max-w-full rounded-lg object-contain bg-gray-200 rounded-lg transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" :src="showImage" alt="Image"  :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
                                     </div>
                                     <div class="grid grid-cols-5 gap-4">
                                         <div v-for="(slide,index) in galleryData" :key="index">
-                                            <img @click="showImage = slide" class="h-auto max-w-full rounded-lg" :src="slide" alt="Image">
+                                            <img @click="showImage = slide" class="h-20 w-full max-w-36 object-cover rounded-lg" :src="slide" alt="Image">
                                             <button @click="removeImage(index)">remove</button>
                                         </div>
                                     </div>
@@ -446,12 +423,9 @@ const imageMouseMove = (e) => {
                                     </p>
                                     <div v-if="fields.length > 0">
                                         <p v-for="(field,index) in fields" :key="field.name.id" class="text-sm font-normal mb-2">
-                                            <span class="font-semibold">{{ field.name[0]?.toUpperCase() + field.name?.slice(1) }} : </span><span>{{ form.fields.key1[index].value }}</span>
+                                            <span class="font-semibold">{{ (field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ') }} : </span><span>{{ form.fields.key1[index].value }}</span>
                                         </p>
                                     </div>
-                                    <p class="text-sm font-normal mb-2">
-                                        <span v-if="form.condition != null && form.condition != ''" class="font-semibold">Condition : </span><span>{{ condition_name }}</span>
-                                    </p>
                                     <p class="text-sm font-normal mb-2">
                                         <span v-if="form.location != null && form.location != ''" class="font-semibold">Address : </span><span>{{ form.location }}</span>
                                     </p>
@@ -485,9 +459,14 @@ const imageMouseMove = (e) => {
                     <div class="shadow-md p-4 rounded-lg bg-gray-100">
                         <h4 class="text-md font-semibold mb-2">Stay Safe</h4>
                         <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
-                        <p >
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-                        </p>
+                        
+                        <ul class="text-sm leading-6 text-gray-500 list-disc list-inside dark:text-gray-400 mt-3">
+                            <li>Meet the seller with a private place</li>
+                            <li>Don’t pay in advance</li>
+                            <li>Make sure the item you want to purchase is what you need by checking it.</li>
+                            <li>Any safety concerns should be reported to the SureSale team.</li>
+                        </ul>
+                        
                         <a href="#" class="text-sm font-semibold mt-3 flex items-center">
                             <span>Read More</span>
                             <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

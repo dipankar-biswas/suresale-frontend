@@ -1,5 +1,47 @@
 <script setup>
-const props = defineProps(['adsItem'])
+const props = defineProps(['adsItem']);
+const auth = useAuthStore();
+const datetime = useDateTime();
+const common = useCommonFun();
+
+
+
+// Bookmark
+const bookmarkAdd = async(product) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            product.is_bookmarked = 1;
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
+
+const bookmarkRemove = async(product) => {
+    const token = useTokenStore();
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+        if(data){
+            product.is_bookmarked = 0;
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
 </script>
 
 <template>
@@ -26,7 +68,24 @@ const props = defineProps(['adsItem'])
                     {{ props.adsItem?.title }}
                 </nuxt-link>
             </h4>
-            <slot />
+            <h5 class="mb-2 text-sm font-samibold tracking-tight text-gray-500 dark:text-white">
+                {{ common.parseText(props.adsItem?.location,60) }}
+            </h5>
+            
+
+            <div class="flex justify-between">
+                <p class="text-sm">
+                    <nuxt-link :to="`${props.adsItem?.user?.name.replaceAll(' ','-')}/${props.adsItem?.user?.id}/products`">{{ props.adsItem?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(props.adsItem?.created_at) }}
+                </p>
+                <div v-if="auth?.user?.id != props.adsItem?.user_id">
+                    <svg v-if="props.adsItem?.is_bookmarked == 1" @click="bookmarkRemove(props.adsItem)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                    </svg>
+                    <svg v-else @click="bookmarkAdd(props.adsItem)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
+                    </svg>
+                </div>
+            </div>
         </div>
     </div>
 </template>

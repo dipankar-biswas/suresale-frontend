@@ -131,43 +131,6 @@ const loadMoreBtn = async() => {
     }
 }
 
-
-// Bookmark
-const bookmarkAdd = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            searchDatas.value[index].is_bookmarked = 1;
-        }
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
-
-const bookmarkRemove = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            searchDatas.value[index].is_bookmarked = 0;
-        }
-    }catch(error){
-        console.log('Somthing Wrong!');
-    }
-}
 </script>
 <template>
     <div class="content">
@@ -219,24 +182,7 @@ const bookmarkRemove = async(id,index) => {
                         <div class="bg-white">
                             <div class="flex flex-cols-1  lg:flex-cols-2 gap-x-5 gap-y-5 h-full">
                                 <div v-if="categoryDatas" class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-5">
-                                    <AdsItem v-for="(ads,index) in categoryDatas" :key="index" :adsItem="ads">
-                                        <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                                            {{ common.parseText(ads.description,80) }}
-                                        </h5>
-                                        <div class="flex justify-between">
-                                            <p class="text-sm">
-                                                <nuxt-link :to="`/${ads?.user?.name.replaceAll(' ','-')}/${ads?.user?.id}/products`">{{ ads?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(ads.created_at) }}
-                                            </p>
-                                            <div v-if="auth?.user?.id != ads?.user_id">
-                                                <svg v-if="ads.is_bookmarked == 1" @click="bookmarkRemove(ads.id,index)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                                                </svg>
-                                                <svg v-else @click="bookmarkAdd(ads.id,index)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </AdsItem>
+                                    <AdsItem v-for="(ads,index) in categoryDatas" :key="index" :adsItem="ads"></AdsItem>
                                 </div>
                             </div>
 

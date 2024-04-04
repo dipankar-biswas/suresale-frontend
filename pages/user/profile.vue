@@ -2,11 +2,12 @@
 import { onMounted } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
-onMounted(() => {
-    initFlowbite();
-})
 definePageMeta({
   middleware: ["auth"]
+})
+
+onMounted(() => {
+    initFlowbite();
 })
 useSeoMeta({
   title: 'My Profile - My Amazing Site',
@@ -19,9 +20,6 @@ useSeoMeta({
 
 const auth = useAuthStore();
 const common = useCommonFun();
-definePageMeta({
-  middleware: ["auth"]
-})
 
 
 const errors = ref([]);
@@ -137,11 +135,52 @@ const profilePicUpdateBtn = async() => {
 
 // Account Switch
 const Business = async() => {
+    const modal = new Modal(document.getElementById('price-modal'), null);
+    modal.show();
+    BusinessPackages();
+}
+
+const loading = ref(false);
+const businesspackages = ref([]);
+const BusinessPackages = async() => {
+    refreshNuxtData();
+    const token = useTokenStore();
+    loading.value = true;
+    try{
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/business-packages`, {
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token.getToken}`,
+                    },
+                });
+            if(data){
+                loading.value = false;
+                businesspackages.value = data.value;
+            }
+    }catch(error){
+        loading.value = false;
+        console.log(error);
+    }
+}
+
+
+
+const plandata = reactive({
+    shop_name: null,
+    package_id: null,
+})
+const planSubmit = async(event) => {
+    const modal = new Modal(document.getElementById('price-modal'), null);
+    plandata.package_id = event;
+
     loadbtn3.value = true;
     try{
-        const data = await auth.AccountSwitch();
-        loadbtn3.value = false;
-        success_msg3.value = data.message;
+        const data = await auth.AccountSwitch(plandata);
+        if(data){
+            loadbtn3.value = false;
+            success_msg3.value = data.message;
+            modal.hide();
+        }
     }catch(error){
         errors3.value = error.data.errors;
         loadbtn3.value = false;
@@ -183,15 +222,16 @@ const Business = async() => {
                                     <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="image"/>
                                 </div>
                                 <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="auth?.user?.name">{{ auth?.user?.name }}</h5>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
+                                <!-- <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span> -->
                                 <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
-                            </div>
-                            <div class="w-1/4 mt-4">
+                                <!-- <button type="button" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-2">Upgraded Business Account</button> -->
+                                <!-- <button type="button" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button> -->
                                 <div class="flex" v-if="auth?.user?.id">
                                     <button type="button" v-if="auth?.user?.business?.id" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Upgraded Business Account</button>
                                     <button type="button" v-else @click="Business" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button>
                                 </div>
                             </div>
+                            <div class="w-1/4 mt-4"></div>
                         </div>
                     </div>
 
@@ -377,6 +417,46 @@ const Business = async() => {
                             <button data-modal-hide="default-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Cancel</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Price modal -->
+        <div id="price-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-2xl max-h-full">
+                <!-- Modal content -->
+                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                            Account Upgrade Plan
+                        </h3>
+                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="price-modal">
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                            <span class="sr-only">Close modal</span>
+                        </button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="p-4 md:p-5 space-y-4">
+                        <div class="mb-4">
+                            <input type="text" v-model="plandata.shop_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Shop Name" required />
+                        </div> 
+                        <div v-if="!loading" class="rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-5 gap-y-5">
+                            
+                            <UserPricePlan v-for="(pack,index) of businesspackages" :key="pack.id" :packageItem="pack" @planId="planSubmit($event)">
+                                <button @click="planSubmit(pack.id)" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-200 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex justify-center w-full text-center">Choose plan</button>
+                            </UserPricePlan>
+
+                        </div>
+                        <div v-else class="w-full">
+                            <div class="item px-4 py-1.5 my-6 flex justify-center items-center">
+                                <img src="assets/images/loader.gif" alt="Loading..." class="flex w-6">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

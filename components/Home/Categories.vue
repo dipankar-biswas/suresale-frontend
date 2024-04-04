@@ -1,16 +1,18 @@
 <script setup>
 const common = useCommonFun();
 
-const totalcat = ref(0);
+// const totalcat = ref(0);
 const categories = ref([]);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        totalcat.value = data.value?.categories;
-        categories.value = data.value?.categories?.data;
+        // totalcat.value = data.value?.categories;
+        console.log(data.value);
+        // categories.value = data.value?.categories?.data;
+        categories.value = data.value;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 getCetagories();
@@ -33,13 +35,13 @@ watch(() => categories.value, async (currentValue) => {
     const sliders = sliderMainDiv?.querySelector('.sliders');
     const sliderDivWidht = sliderMainDiv?.offsetWidth;
     if(window?.innerWidth > 991){
-        showNum.value = 7;
+        showNum.value = 11;
     }else if(window?.innerWidth > 767){
-        showNum.value = 4;
+        showNum.value = 7;
     }else if(window?.innerWidth > 575){
-        showNum.value = 3;
+        showNum.value = 5;
     }else if(window?.innerWidth > 375){
-        showNum.value = 2;
+        showNum.value = 3;
     }
     indexCount.value = indexCount.value + showNum.value;
     slideWidht.value = parseFloat(sliderDivWidht) / parseFloat(showNum.value);
@@ -51,7 +53,7 @@ watch(() => categories.value, async (currentValue) => {
         // Custom style
         sliders.style = `column-gap:${gap.value}px;transition: transform ${transition.value}s ease-in-out;`;
         slides.value = sliders?.querySelectorAll('.slide');
-        slidesLenght.value = slides.value.length;
+        slidesLenght.value = slides.value?.length;
         for (let el of slides.value) {
             el.style.minWidth= `${singleWidth.value}px`;
         }
@@ -97,7 +99,7 @@ const loadMoreCatBtn = async() => {
             for(let i = 0; i<data.value?.categories?.data?.length; i++) {
                 newSlide += `
                         <div draggable class="slide w-full h-44 flex justify-center items-center text-center" style="min-width:${singleWidth.value?.toFixed(3)}px;">
-                            <nuxt-link :to="/category/${data.value?.categories?.data[i]?.id}" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                            <nuxt-link :to="/category/${data.value?.categories?.data[i]?.id}" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 hover:scale-105 hover:bg-gray-100">
                                 <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
                                     <img src="" alt="Image" class="w-full h-full object-cover">
                                 </div>
@@ -120,28 +122,28 @@ const loadMoreCatBtn = async() => {
     <div class="slider mx-auto w-full max-w-screen-2xl px-4 py-2">
         <div class="title flex justify-between items-center gap-3 px-3 py-3 border-b-2 mb-4">
             <h4 class="text-xl font-semibold">Categories</h4>
-            <h5>See All</h5>
+            <!-- <h5>See All</h5> -->
         </div>
         <div class="relative">
             <div class="slider-container slider-categories flex overflow-hidden">
                 <div class="sliders flex" id="sliderContent">
                     <div class="slide w-full h-44 flex justify-center items-center text-center">
-                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
-                            <h4 class="title font-semibold">All Categories</h4>
-                            <p class="text-gray-400 text-sm">{{ categories?.length }}</p>
+                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100 cursor-pointer">
+                            <h4 class="title font-semibold leading-0">All Categories</h4>
+                            <p class="text-gray-400 text-xs leading-0">( {{ categories?.length }} )</p>
                         </div>
                     </div>
                     <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full h-44 flex justify-center items-center text-center">
-                        <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                        <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100">
                             <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
-                                <img src="assets/images/categories/thumb-sub-cat-tops.webp" alt="Image" class="w-full h-full object-cover">
+                                <img src="assets/images/categories/thumb-sub-cat-tops.webp" alt="Image" class="w-8 h-8 object-cover">
                             </div>
-                            <h4 class="title font-semibold">{{ cat.name }}</h4>
-                            <p class="text-gray-400 text-sm">{{ cat.product_count }} ads</p>
+                            <h4 class="title font-semibold leading-">{{ cat.name }}</h4>
+                            <p class="text-gray-400 text-xs leading-0">{{ cat.product_count }} ads</p>
                         </nuxt-link>
                     </div>
                     <!-- <div @click="loadMoreCatBtn" class="slide w-full h-44 flex justify-center items-center text-center">
-                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] shadow-lg p-2 hover:scale-105 hover:bg-gray-100">
+                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 hover:scale-105 hover:bg-gray-100">
                             <h4 class="title font-semibold">More Categories</h4>
                             <p class="text-gray-400 text-sm">{{ totalcat.total }} Items</p>
                             <span class="mt-2">

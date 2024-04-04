@@ -501,15 +501,15 @@ const linkcopyFun = () => {
                         
                         <div class="w-9/12">
                             <div class="feature-image overflow-hidden rounded-lg">
-                                <img class="rounded-lg w-full h-96 object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
-                                <img class="rounded-lg w-full h-96 object-cover transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-else src="assets/images/dummy-image.jpg" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                <img class="h-96 w-full max-w-full rounded-lg object-contain bg-gray-200 rounded-lg transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-if="adsView?.picture" :src="useRuntimeConfig().public.imageUrl+'/'+showImage?.replaceAll('public','storage')" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
+                                <img class="h-96 w-full max-w-full rounded-lg object-contain bg-gray-200 rounded-lg transition duration-150 ease-out cursor-zoom-in" @mouseenter="imageMouseEnter" @mouseleave="imageMouseLeave" @mousemove="imageMouseMove" v-else src="assets/images/dummy-image.jpg" alt="Ads" :style="`transform: scale(${transformScale}); transform-origin: ${xBy} ${yBy};`" />
                             </div>
                         </div>
                         <div class="w-3/12">
 
                             <div class="slides flex flex-col gap-y-3">
                                 <div v-for="(image,index) in adsView?.picture" :key="index" class="item border border-cyan-500 rounded-lg">
-                                    <img class="rounded-lg w-full h-28 object-cover" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image?.replaceAll('public','storage')" alt="Ads" />
+                                    <img class="h-28 w-full max-w-full object-cover rounded-lg" @click="showImage = image" :src="useRuntimeConfig().public.imageUrl+'/'+image?.replaceAll('public','storage')" alt="Ads" />
                                 </div>
                             </div>
                         </div>
@@ -730,9 +730,14 @@ const linkcopyFun = () => {
                     <div class="shadow-md p-4 rounded-lg bg-gray-100">
                         <h4 class="text-md font-semibold mb-2">Stay Safe</h4>
                         <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
-                        <p >
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-                        </p>
+                        
+                        <ul class="text-sm leading-6 text-gray-500 list-disc list-inside dark:text-gray-400 mt-3">
+                            <li>Meet the seller with a private place</li>
+                            <li>Don’t pay in advance</li>
+                            <li>Make sure the item you want to purchase is what you need by checking it.</li>
+                            <li>Any safety concerns should be reported to the SureSale team.</li>
+                        </ul>
+
                         <a href="#" class="text-sm font-semibold mt-3 flex items-center">
                             <span>Read More</span>
                             <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -753,24 +758,7 @@ const linkcopyFun = () => {
                 <h4 class="text-xl font-semibold">Similar Ads</h4>
             </div>
             <div class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5">
-                <AdsItem v-for="(sads,index) of adsSuggestion" :key="sads.id" :adsItem="sads">
-                    <h5 class="mb-2 text-lg font-samibold tracking-tight text-gray-900 dark:text-white">
-                        {{ common.parseText(sads.description,80) }}
-                    </h5>
-                    <div class="flex justify-between">
-                        <p class="text-sm">
-                            <nuxt-link :to="`/${sads?.user?.name?.replaceAll(' ','-')}/${sads?.user?.id}/products`">{{ sads?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(sads.created_at) }}
-                        </p>
-                        <div v-if="auth?.user?.id != sads?.user_id">
-                            <svg v-if="sads?.is_bookmarked == 1" @click="bookmarkRemove(sads?.id,index)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                            </svg>
-                            <svg v-else @click="bookmarkAdd(sads?.id,index)" class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </AdsItem>
+                <AdsItem v-for="(sads,index) of adsSuggestion" :key="sads.id" :adsItem="sads"></AdsItem>
             </div>
         </div>
     </div>

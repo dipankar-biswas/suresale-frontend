@@ -1,4 +1,5 @@
 <script setup>
+import imagePath from '/assets/images/slider/slider-1.webp';
 const form = reactive({
     category: '',
     searchText: '',
@@ -9,9 +10,9 @@ const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        categories.value = data.value?.categories?.data;
+        categories.value = data.value;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 getCetagories();
@@ -48,8 +49,9 @@ watch(() => form.category, async (currentValue) => {
 
 </script>
 <template>
-    <div class="banner w-full h-60 bg-center bg-no-repeat bg-cover" style="background-image: url('/_nuxt/assets/images/slider/slider-1.webp')">
-        <div class="max-w-screen-2xl flex flex-wrap items-end justify-between h-full mx-auto p-4">
+    <!-- assets/images/slider/slider-1.webp -->
+    <div class="banner w-full h-40 bg-center bg-no-repeat bg-cover" :style="`background-image: url(${imagePath})`">
+        <div class="max-w-screen-2xl flex flex-wrap items-center justify-between h-full mx-auto p-4">
         
             <form class="flex justify-center w-full">
                 <div class="flex justify-center w-3/4">
@@ -61,7 +63,7 @@ watch(() => form.category, async (currentValue) => {
                                 class="w-fit bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-s-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <option disabled value="">Category</option>
                                 <option v-for="cat of categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                                <option value="morecat">More Categoris</option>
+                                <!-- <option value="morecat">More Categoris</option> -->
                             </select>
     
                             <input type="text" v-model="form.searchText" id="search-dropdown" class="block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" placeholder="Search Mockups, Logos, Design Templates...">

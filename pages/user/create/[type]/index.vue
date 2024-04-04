@@ -2,12 +2,14 @@
 import { onMounted } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
+definePageMeta({
+    middleware: ["auth"]
+});
+
 onMounted(() => {
     initFlowbite();
 })
-definePageMeta({
-  middleware: ["auth"]
-})
+
 useSeoMeta({
   title: 'Ads Category Select - My Amazing Site',
   ogTitle: 'My Amazing Site',

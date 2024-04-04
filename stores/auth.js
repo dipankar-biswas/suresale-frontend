@@ -186,20 +186,22 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async AccountSwitch(){
+        async AccountSwitch(formData){
             const token = useTokenStore();
             try{
                 const data = await $fetch(`${useRuntimeConfig().public.baseUrl}/business-apply`, {
+                    method: 'POST',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
+                    body: formData
                 });
                 this.getUserData();
                 return data;
             }catch(error){
                 throw error;
             }
-        }
+        },
     },
 })

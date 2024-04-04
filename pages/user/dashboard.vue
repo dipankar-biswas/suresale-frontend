@@ -2,14 +2,16 @@
 import { onMounted } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
+definePageMeta({
+  middleware: ["auth"]
+})
+
 const auth = useAuthStore();
 
 onMounted(() => {
     initFlowbite();
 })
-definePageMeta({
-  middleware: ["auth"]
-})
+
 useSeoMeta({
   title: 'My Dashboard - My Amazing Site',
   ogTitle: 'My Amazing Site',

@@ -202,7 +202,7 @@ const bookmarkRemove = async(id,index) => {
                                 <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
                             </div>
                             <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ allAds?.name }}</h5>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span>
+                            <!-- <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span> -->
                             <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
                         </div>
                         <div class="w-1/4 mt-4">

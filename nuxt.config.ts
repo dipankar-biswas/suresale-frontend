@@ -40,8 +40,8 @@ export default defineNuxtConfig({
         // default values
         componentName: 'UserSidebar',
         externalRelAttribute: '',
-        activeClass: 'active bg-violet-700 hover:bg-gray-300 text-white hover:text-gray-700',
-        exactActiveClass: 'active bg-violet-700 hover:bg-gray-300 text-white hover:text-gray-700',
+        activeClass: 'active',
+        exactActiveClass: 'active',
         prefetchedClass: undefined, // can be any valid string class name
         trailingSlash: undefined // can be 'append' or 'remove'
       }

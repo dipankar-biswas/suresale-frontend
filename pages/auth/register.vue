@@ -133,12 +133,14 @@ const passHideShow1 = ref(false);
                     <div class="shadow-md p-4 rounded-lg bg-gray-100">
                         <h4 class="text-md font-semibold mb-2">Stay Safe</h4>
                         <hr class="h-px my-3 bg-gray-300 border-0 dark:bg-gray-700">
-                        <p class="mb-2 text-sm leading-6 text-gray-500">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                        <p class="mb-2 text-sm leading-6 text-gray-500">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s
-                        </p>
+                        
+                        <ul class="text-sm leading-6 text-gray-500 list-disc list-inside dark:text-gray-400 mt-3">
+                            <li>Choose a strong password to registration</li>
+                            <li>Update your informations</li>
+                            <li>Enter registration credential privately</li>
+                            <li>Never share your passwords and  credential with others</li>
+                        </ul>
+
                     </div>
                 </div>
             </div>

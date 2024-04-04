@@ -2,12 +2,14 @@
 import { onMounted } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
+definePageMeta({
+    middleware: ["auth"]
+})
+
 onMounted(() => {
     initFlowbite();
 })
-definePageMeta({
-middleware: ["auth"]
-})
+
 useSeoMeta({
     title: 'Chat Messages - My Amazing Site',
     ogTitle: 'My Amazing Site',
@@ -17,10 +19,6 @@ useSeoMeta({
     twitterCard: 'image',
 })
 const auth = useAuthStore();
-definePageMeta({
-middleware: ["auth"]
-})
-
 
 const chatLists = ref('');
 const getChatList = async() => {
