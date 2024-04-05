@@ -2,6 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { Modal, initFlowbite } from 'flowbite';
 
+definePageMeta({
+    middleware: ["guest"]
+})
+
 onMounted(() => {
     initFlowbite();
 })
@@ -17,9 +21,6 @@ useSeoMeta({
 
 const toaster = useToasterStore();
 const auth = useAuthStore();
-definePageMeta({
-  middleware: ["guest"]
-})
 const form = reactive({
     email: 'test@example.com',
     password: 'password',

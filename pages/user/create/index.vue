@@ -19,12 +19,18 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const token = useTokenStore();
+
 const adstype = ref([]);
 const adsType = async() => {
     refreshNuxtData();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories`);
-        adstype.value = data.value.data;
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories`);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            adstype.value = data.value.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -43,8 +49,12 @@ const showCategory = async(type) => {
     const modal = new Modal(document.getElementById('categoryselect-modal'), null);
     modal.show();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${type?.id}`);
-        categories.value = data.value.data;
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${type?.id}`);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            categories.value = data.value.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -59,17 +69,21 @@ const activeFun = async(id,index) => {
 
     try{
         categories.value = [];
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${id}`);
-        if(data.value.data.length == 0 || data.value.data == null){
-            const modal = new Modal(document.getElementById('categoryselect-modal'), null);
-            if(typeId.value != null && categoryId.value != null){
-                modal.hide();
-                return navigateTo(`/user/create/${typeId.value}/${categoryId.value}`);
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${id}`);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            if(data.value.data.length == 0 || data.value.data == null){
+                const modal = new Modal(document.getElementById('categoryselect-modal'), null);
+                if(typeId.value != null && categoryId.value != null){
+                    modal.hide();
+                    return navigateTo(`/user/create/${typeId.value}/${categoryId.value}`);
+                }
+            }else {
+                isActive.value = [];
+                categories.value = data.value.data;
+                loading.value = false;
             }
-        }else {
-            isActive.value = [];
-            categories.value = data.value.data;
-            loading.value = false;
         }
         
     }catch(error){
@@ -101,7 +115,7 @@ const actionSubmit = async() => {
                             
                             <div v-for="(type,index) in adstype" :key="type.id" class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                                 <div @click="showCategory(type)" class="flex flex-col items-center px-6 pt-6 pb-8">
-                                    <img class="w-24 h-24 mb-3 rounded-full shadow-lg" src="/assets/images/avatar.png" alt="Bonnie image"/>
+                                    <img class="w-24 h-24 mb-3 rounded-full shadow-lg" :src="useRuntimeConfig().public.imageUrl+'/'+type.image" alt="image"/>
                                     <h5 class="mb-1 text-xl text-center font-medium text-gray-900 dark:text-white">
                                         <h4 class="text-md text-gray-600">{{ type.name }}</h4>
                                     </h5>

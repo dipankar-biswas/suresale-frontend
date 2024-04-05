@@ -19,6 +19,8 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const token = useTokenStore();
+
 const route = useRoute();
 
 const categories = ref([]);
@@ -26,8 +28,12 @@ const categoryId = ref(null);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
-        categories.value = data.value.data;
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            categories.value = data.value.data;
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }

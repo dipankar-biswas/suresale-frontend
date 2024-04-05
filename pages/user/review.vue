@@ -18,7 +18,7 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
-
+const token = useTokenStore();
 const common = useCommonFun();
 
 // =======================================
@@ -26,15 +26,19 @@ const common = useCommonFun();
 const pdtreviews = ref([]);
 const pdtReviews = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        pdtreviews.value = data.value.data.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            pdtreviews.value = data.value.data.data;
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }

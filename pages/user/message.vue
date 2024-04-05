@@ -18,21 +18,27 @@ useSeoMeta({
     ogImage: 'image',
     twitterCard: 'image',
 })
+
 const auth = useAuthStore();
+const token = useTokenStore();
 
 const chatLists = ref('');
 const getChatList = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message`, {
                     method: 'OPTIONS',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        chatLists.value = data.value.data.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            chatLists.value = data.value.data.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -61,7 +67,7 @@ const chatslistlastid = ref(null);
 const getMessages = async() => {
     refreshNuxtData();
     
-    const token = useTokenStore();
+    
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=0&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
                     method: 'GET',
@@ -79,7 +85,7 @@ const getMessages = async() => {
 
 const loadmoremsgdata = ref([]);
 const loadMoreMsgFun = async(id) => {
-    const token = useTokenStore();
+    
     let chats = document?.getElementById('chats');
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=${id}&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {

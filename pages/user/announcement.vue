@@ -18,6 +18,8 @@ useSeoMeta({
   ogImage: 'image',
   twitterCard: 'image',
 })
+
+const token = useTokenStore();
 const datetime = useDateTime();
 const common = useCommonFun();
 
@@ -25,17 +27,21 @@ const common = useCommonFun();
 const announcement = ref([]);
 const Announcement = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/announcement`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/announcement`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        announcement.value = data.value;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            announcement.value = data.value;
+        }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 Announcement();
@@ -53,17 +59,21 @@ const announRead = async(announ,seenValue) => {
     
     if(seenValue === 0){
         //@todo: One Click Functin Double Call
-        const token = useTokenStore();
+        
         try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/announcement/${announ?.id}`,{
+            const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/announcement/${announ?.id}`,{
                 method: 'PATCH',
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${token.getToken}`,
                 },
             });
-            announcementdetail.value = announ;
-            Announcement();
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                token.removeToken();
+            } else {
+                announcementdetail.value = announ;
+                Announcement();
+            }
         }catch(error){
             console.log(error);
         }

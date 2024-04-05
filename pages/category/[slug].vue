@@ -180,7 +180,7 @@ const loadMoreBtn = async() => {
                     <!-- Ads -->
                     <div class="mx-auto w-full max-w-screen-2xl px-4 py-2">
                         <div class="bg-white">
-                            <div class="flex flex-cols-1  lg:flex-cols-2 gap-x-5 gap-y-5 h-full">
+                            <div class="w-full">
                                 <div v-if="categoryDatas" class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-5">
                                     <AdsItem v-for="(ads,index) in categoryDatas" :key="index" :adsItem="ads"></AdsItem>
                                 </div>

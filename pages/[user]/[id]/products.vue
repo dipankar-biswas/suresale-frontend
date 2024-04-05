@@ -113,7 +113,7 @@ const AllAds = async() => {
         allAds.value = data.value;
         allAdsList.value = data.value?.product?.data;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 AllAds();
@@ -129,7 +129,7 @@ const loadMoreBtn = async() => {
         allAds.value.push(...data.value.data);
         loadbtn.value = false;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
         loadbtn.value = false;
     }
 }
@@ -151,7 +151,7 @@ const bookmarkAdd = async(id,index) => {
             allAdsList.value[index].is_bookmarked = 1;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 
@@ -169,7 +169,7 @@ const bookmarkRemove = async(id,index) => {
             allAdsList.value[index].is_bookmarked = 0;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 </script>
@@ -203,7 +203,7 @@ const bookmarkRemove = async(id,index) => {
                             </div>
                             <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ allAds?.name }}</h5>
                             <!-- <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span> -->
-                            <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
+                            <span class="text-sm font-semibold dark:text-gray-400">{{ allAds?.followers_count }} Followers</span>
                         </div>
                         <div class="w-1/4 mt-4">
                             <div class="flex" v-if="auth.user.id != allAds?.id">

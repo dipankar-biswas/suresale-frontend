@@ -18,7 +18,10 @@ useSeoMeta({
   ogImage: 'image',
   twitterCard: 'image',
 })
+
+const token = useTokenStore();
 const datetime = useDateTime();
+
 const listgrid = ref(1);
 
 // =======================================
@@ -26,15 +29,19 @@ const listgrid = ref(1);
 const bookmarks = ref([]);
 const MyBookmarks = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        bookmarks.value = data.value.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            bookmarks.value = data.value.data;
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }
@@ -43,18 +50,22 @@ MyBookmarks();
 
 
 const bookmarkRemove = async(id,index) => {
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
                     method: 'DELETE',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        MyBookmarks();
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            MyBookmarks();
+        }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 

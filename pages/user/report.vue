@@ -18,6 +18,7 @@ useSeoMeta({
   twitterCard: 'image',
 })
 
+const token = useTokenStore();
 const datetime = useDateTime();
 const common = useCommonFun();
 
@@ -25,16 +26,20 @@ const common = useCommonFun();
 const reports = ref([]);
 const Reports = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report`,{
             method: 'GET',
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        reports.value = data.value.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            reports.value = data.value.data;
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }
@@ -71,7 +76,7 @@ const reportDeleteIcon = async(id) => {
 const reportDeleteBtn = async() => {
     const modal = new Modal(document.getElementById('reportdelete-modal'), null);
     
-    const token = useTokenStore();
+    
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report/${reportDeleteId.value}`,{
             method: 'DELETE',

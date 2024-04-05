@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const auth = useAuthStore();
+const token = useTokenStore();
 
 onMounted(() => {
     initFlowbite();
@@ -25,7 +26,7 @@ useSeoMeta({
 const chatLists = ref('');
 const getChatList = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message`, {
                     method: 'OPTIONS',
@@ -34,7 +35,11 @@ const getChatList = async() => {
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        chatLists.value = data.value.data.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            chatLists.value = data.value.data.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -47,7 +52,7 @@ const pdtreviews = ref([]);
 const totalRating = ref(0);
 const pdtReviews = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`,{
             headers: {
@@ -55,13 +60,17 @@ const pdtReviews = async() => {
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        pdtreviews.value = data.value.data.data;
-
-        let ratingSum = 0;
-        for (let i = 0; i < pdtreviews.value.length; i++) {
-            ratingSum += pdtreviews.value[i].rating;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            pdtreviews.value = data.value.data.data;
+    
+            let ratingSum = 0;
+            for (let i = 0; i < pdtreviews.value?.length; i++) {
+                ratingSum += pdtreviews.value[i].rating;
+            }
+            totalRating.value = ratingSum / pdtreviews.value?.length;
         }
-        totalRating.value = ratingSum / pdtreviews.value.length;
     }catch(error){
         console.log(error);
     }
@@ -74,16 +83,20 @@ const allAdsList = ref([]);
 const AllAds = async() => {
     console.log('SDHFiusgf');
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${auth?.user?.id}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${auth?.user?.id}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        allAds.value = data.value;
-        allAdsList.value = data.value?.product?.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            allAds.value = data.value;
+            allAdsList.value = data.value?.product?.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -106,7 +119,7 @@ AllAds();
                                 <div class="flex justify-between">
                                     <div class="flex flex-col gap-y-3">
                                         <h4 class="text-md font-semibold">
-                                            <span v-if="chatLists.length > 0">{{ chatLists.length }}</span>
+                                            <span v-if="chatLists?.length > 0">{{ chatLists?.length }}</span>
                                             <span v-else>0</span>
                                         </h4>
                                         <h4 class="text-md font-semibold hover:text-blue-500"><nuxt-link to="/user/message">Chat</nuxt-link></h4>
@@ -123,7 +136,7 @@ AllAds();
                                 <div class="flex justify-between">
                                     <div class="flex flex-col gap-y-3">
                                         <h4 class="text-md font-semibold">
-                                            <span v-if="pdtreviews.length > 0">{{ pdtreviews.length }}</span>
+                                            <span v-if="pdtreviews?.length > 0">{{ pdtreviews?.length }}</span>
                                             <span v-else>0</span>
                                         </h4>
                                         <h4 class="text-md font-semibold">Reviews</h4>
@@ -147,7 +160,7 @@ AllAds();
                         <div class="adses rounded grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-5 gap-y-5">
                             <div class="bg-white rounded-md p-3 flex flex-col gap-y-3">
                                 <h4 class="text-md font-semibold">
-                                    <span v-if="allAdsList.length > 0">{{ allAdsList.length }}</span>
+                                    <span v-if="allAdsList?.length > 0">{{ allAdsList?.length }}</span>
                                     <span v-else>0</span>
                                 </h4>
                                 <h4 class="text-md font-semibold">Active and pending</h4>

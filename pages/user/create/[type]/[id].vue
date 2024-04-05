@@ -22,8 +22,10 @@ useSeoMeta({
 
 const toaster = useToasterStore();
 const auth = useAuthStore();
-const route = useRoute();
+const token = useTokenStore();
 const common = useCommonFun();
+
+const route = useRoute();
 
 const form = reactive({
     title: null,
@@ -48,26 +50,30 @@ const form = reactive({
 const fields = ref([]);
 const categoryFields = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/${route.params.id}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/${route.params.id}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             }
         });
-        fields.value = data.value.data;
-        for (let i = 0; i < fields.value.length; i++) {
-            // let fieldName = (fields.value[i].name).toLowerCase().replaceAll(' ','_');
-            // let fieldValue = fields.value[i].name;
-            let fieldObject = {
-                name: fields.value[i].name,
-                value: null
-            };
-            form.fields.key1.push(fieldObject);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            fields.value = data.value.data;
+            for (let i = 0; i < fields.value.length; i++) {
+                // let fieldName = (fields.value[i].name).toLowerCase().replaceAll(' ','_');
+                // let fieldValue = fields.value[i].name;
+                let fieldObject = {
+                    name: fields.value[i].name,
+                    value: null
+                };
+                form.fields.key1.push(fieldObject);
+            }
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 categoryFields();
@@ -100,17 +106,21 @@ const allTags = ref([]);
 const todos = ref([]);
 const todoText = ref("");
 const tagKeyUp = async() => {
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/tags?name=${todoText.value}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/tags?name=${todoText.value}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        allTags.value = data.value;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            allTags.value = data.value;
+        }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 function addTodo(id,name) {
@@ -133,11 +143,15 @@ const category_name = ref(null);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
-        categories.value = data.value.data;
-        category_name.value = categories.value.find(item => item?.id == catId.value)?.name;
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            categories.value = data.value.data;
+            category_name.value = categories.value.find(item => item?.id == catId.value)?.name;
+        }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 getCetagories();
@@ -149,14 +163,18 @@ const loadbtn = ref(false);
 
 const handelSubmit = async() => {
     try{
-        const { pending, data } = await useFetch('https://maps.googleapis.com/maps/api/geocode/json',{
+        const { pending, data, error } = await useFetch('https://maps.googleapis.com/maps/api/geocode/json',{
             params:{
                 address:form.location,
                 key:'AIzaSyD-0xI794-kqn_h4sK6GJeACrGfDQMBUgk'
             }
         })
-        form.lat = data.value?.results[0].geometry.location.lat;
-        form.lng = data.value?.results[0].geometry.location.lng;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            form.lat = data.value?.results[0].geometry.location.lat;
+            form.lng = data.value?.results[0].geometry.location.lng;
+        }
 
     }catch(error){
         console.log(error);
@@ -186,7 +204,7 @@ const handelSubmit = async() => {
         formdata.append(`${fields.value[i].name}`, form.fields.key1[i].value);
     }
 
-    const token = useTokenStore();
+    
     try{
         const data = await $fetch(`${useRuntimeConfig().public.baseUrl}/product`, {
             method: 'POST',
@@ -409,8 +427,8 @@ const imageMouseMove = (e) => {
                                         <span v-else>Title</span>
                                     </h2>
                                     <h4 class="text-lg font-semibold mb-3">
-                                        <span v-if="form.price != null && form.price != ''">Tk.{{ form.price }} <span v-if="form.negotiable != 0 && form.negotiable != ''" class="text-sm font-semibold mb-3">( Ask Price )</span></span>
-                                        <span v-else>Price</span>
+                                        <span v-if="form.price != null && form.price != ''">Tk.{{ form.price }} <span v-if="form.negotiable != 0 && form.negotiable != ''" class="text-sm font-semibold mb-3">( Negotiable )</span></span>
+                                        <span v-else>Ask Price</span>
                                     </h4>
                                     
                                     <p class="text-sm font-normal mb-4">

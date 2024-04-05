@@ -135,8 +135,8 @@ const loadMoreCatBtn = async() => {
                     </div>
                     <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full h-44 flex justify-center items-center text-center">
                         <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100">
-                            <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
-                                <img src="assets/images/categories/thumb-sub-cat-tops.webp" alt="Image" class="w-8 h-8 object-cover">
+                            <div class="image bg-gray-100 rounded-full w-16 h-16 flex justify-center items-center">
+                                <img :src="useRuntimeConfig().public.imageUrl+'/'+cat.image" alt="Image" class="w-8 h-8 object-cover">
                             </div>
                             <h4 class="title font-semibold leading-">{{ cat.name }}</h4>
                             <p class="text-gray-400 text-xs leading-0">{{ cat.product_count }} ads</p>

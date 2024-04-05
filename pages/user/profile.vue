@@ -19,7 +19,9 @@ useSeoMeta({
 })
 
 const auth = useAuthStore();
+const token = useTokenStore();
 const common = useCommonFun();
+
 
 
 const errors = ref([]);
@@ -41,16 +43,20 @@ const follower = ref(0);
 const followersData = ref([]);
 const followers = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+        const { data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
-                    },
+                    }
                 });
-        followersData.value = data.value.data;
-        follower.value = followersData.value.length;
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                token.removeToken();
+            } else {
+                followersData.value = data.value.data;
+                follower.value = followersData.value.length;
+            }
     }catch(error){
         console.log(error);
     }
@@ -144,16 +150,18 @@ const loading = ref(false);
 const businesspackages = ref([]);
 const BusinessPackages = async() => {
     refreshNuxtData();
-    const token = useTokenStore();
+    
     loading.value = true;
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/business-packages`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/business-packages`, {
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-            if(data){
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                token.removeToken();
+            } else {
                 loading.value = false;
                 businesspackages.value = data.value;
             }
@@ -221,14 +229,14 @@ const planSubmit = async(event) => {
                                     <img class="w-28 h-28 rounded-full p-1" v-if="auth?.user?.profile_picture" :src="common?.defaultProfilePic(auth?.user?.profile_picture) == 0 ? auth?.user?.profile_picture : useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="image"/>
                                     <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="image"/>
                                 </div>
-                                <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="auth?.user?.name">{{ auth?.user?.name }}</h5>
+                                <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white" v-if="auth?.user?.name">
+                                    {{ auth?.user?.business?.package_id ? auth?.user?.business?.shop_name : auth?.user?.name  }}
+                                </h5>
                                 <!-- <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Visual Designer</span> -->
                                 <span class="text-sm font-semibold dark:text-gray-400">{{ follower }} Followers</span>
-                                <!-- <button type="button" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-2">Upgraded Business Account</button> -->
-                                <!-- <button type="button" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button> -->
-                                <div class="flex" v-if="auth?.user?.id">
-                                    <button type="button" v-if="auth?.user?.business?.id" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Upgraded Business Account</button>
-                                    <button type="button" v-else @click="Business" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Business Account</button>
+                                <div class="flex mt-3" v-if="auth?.user?.id">
+                                    <button type="button" v-if="!auth?.user?.business?.id" @click="Business" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Upgraded Business Account</button>
+                                    <button type="button" v-else @click="Business" class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Upgraded Business Plan</button>
                                 </div>
                             </div>
                             <div class="w-1/4 mt-4"></div>
@@ -447,7 +455,8 @@ const planSubmit = async(event) => {
                         <div v-if="!loading" class="rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-5 gap-y-5">
                             
                             <UserPricePlan v-for="(pack,index) of businesspackages" :key="pack.id" :packageItem="pack" @planId="planSubmit($event)">
-                                <button @click="planSubmit(pack.id)" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-200 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex justify-center w-full text-center">Choose plan</button>
+                                <button v-if="auth?.user?.business?.package_id != pack?.id" @click="planSubmit(pack.id)" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-200 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex justify-center w-full text-center">Choose plan</button>
+                                <button v-else type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-200 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex justify-center w-full text-center opacity-50 cursor-not-allowed">Activated plan</button>
                             </UserPricePlan>
 
                         </div>

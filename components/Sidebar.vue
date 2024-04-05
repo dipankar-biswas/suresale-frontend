@@ -19,7 +19,7 @@ const getCetagories = async() => {
     refreshNuxtData();
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        categories.value = data.value?.categories?.data;
+        categories.value = data.value;
     }catch(error){
         console.log('Somthing Wrong!');
     }
