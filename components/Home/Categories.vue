@@ -2,20 +2,32 @@
 const common = useCommonFun();
 
 // const totalcat = ref(0);
-const categories = ref([]);
-const getCetagories = async() => {
-    refreshNuxtData();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
-        // totalcat.value = data.value?.categories;
-        console.log(data.value);
-        // categories.value = data.value?.categories?.data;
-        categories.value = data.value;
-    }catch(error){
-        console.log(error);
-    }
-}
-getCetagories();
+const categories = ref([
+    {id: 2, name: 'Aircraft', slug: 'aircraft', image: 'storage/category/aircraft.svg', desc: null,},
+    {id: 13, name: 'Cars', slug: 'cars', image: 'storage/category/cars.svg', desc: null,},
+    {id: 14, name: 'Classic Cars', slug: 'classic-cars', image: 'storage/category/classic-cars.svg', desc: null, },
+    {id: 293, name: 'Insurance', slug: 'insurance', image: 'storage/category/insurance.svg', desc: null, },
+    {id: 16, name: 'Motorcycles', slug: 'motorcycles', image: 'storage/category/motorcycles.svg', desc: null, },
+    {id: 298, name: 'Office Services', slug: 'office-services', image: 'storage/category/office-services.svg', desc: null, },
+    {id: 278, name: 'Tickets', slug: 'tickets', image: 'storage/category/tickets.svg', desc: null, },
+    {id: 20, name: 'Trucks', slug: 'trucks', image: 'storage/category/trucks.svg', desc: null, },
+    {id: 31, name: 'for rent', slug: 'for-rent', image: 'storage/category/for-rent.svg', desc: null, },
+    {id: 24, name: 'for sale', slug: 'for-sale', image: 'storage/category/for-sale.svg', desc: null,},
+    {id: 0, name: 'All Categories', slug: 'all-categories', image: null, desc: null,},
+]);
+// const getCetagories = async() => {
+//     refreshNuxtData();
+//     try{
+//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/general-categories`);
+//         // totalcat.value = data.value?.categories;
+//         console.log(data.value);
+//         // categories.value = data.value?.categories?.data;
+//         categories.value = data.value;
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
+// getCetagories();
 
 
 const indexCount = ref(0);
@@ -126,13 +138,8 @@ const loadMoreCatBtn = async() => {
         </div>
         <div class="relative">
             <div class="slider-container slider-categories flex overflow-hidden">
-                <div class="sliders flex" id="sliderContent">
-                    <div class="slide w-full h-44 flex justify-center items-center text-center">
-                        <div class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100 cursor-pointer">
-                            <h4 class="title font-semibold leading-0">All Categories</h4>
-                            <p class="text-gray-400 text-xs leading-0">( {{ categories?.length }} )</p>
-                        </div>
-                    </div>
+                <div class="sliders grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-11" id="sliderContent">
+
                     <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full h-44 flex justify-center items-center text-center">
                         <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100">
                             <div class="image bg-gray-100 rounded-full w-16 h-16 flex justify-center items-center">
@@ -156,18 +163,23 @@ const loadMoreCatBtn = async() => {
                 </div>
             </div>
     
-            <div class="arrow">
+            <div class="arrow block lg:hidden">
                 <span @click="prev()" class="prev absolute left-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
                     </svg>
                 </span>
-                <span v-if="slidesLenght != indexCount" @click="next()" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
+                <span @click="next()" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
                     </svg>
                 </span>
-                <span v-else @click="loadMoreCatBtn" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
+                <!-- <span v-if="slidesLenght != indexCount" @click="next()" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                    </svg>
+                </span> -->
+                <!-- <span v-else @click="loadMoreCatBtn" class="prev absolute right-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <div class="text-center" v-if="loadbtn">
                         <div role="status">
                             <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -180,7 +192,7 @@ const loadMoreCatBtn = async() => {
                     <svg v-else class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
                     </svg>
-                </span>
+                </span> -->
             </div>
         </div>
     </div>

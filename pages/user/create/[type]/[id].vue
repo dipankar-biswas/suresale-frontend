@@ -206,7 +206,7 @@ const handelSubmit = async() => {
 
     
     try{
-        const data = await $fetch(`${useRuntimeConfig().public.baseUrl}/product`, {
+        const { data, error } = await $fetch(`${useRuntimeConfig().public.baseUrl}/product`, {
             method: 'POST',
             headers: {
                 Accept: "application/json",
@@ -214,7 +214,9 @@ const handelSubmit = async() => {
             },
             body: formdata
         });
-        if(data){
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
             form.title = null;
             form.price = null;
             form.description = null;

@@ -25,14 +25,18 @@ const followers = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        followersData.value = data.value.data;
-        follower.value = followersData.value.length;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            followersData.value = data.value.data;
+            follower.value = followersData.value.length;
+        }
     }catch(error){
         console.log(error);
     }
@@ -45,14 +49,18 @@ const followings = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        followingsData.value = data.value.data;
-        following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            followingsData.value = data.value.data;
+            following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
+        }
     }catch(error){
         console.log(error);
     }
@@ -62,7 +70,7 @@ followings();
 const follow = async() => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers`, {
                     method: 'POST',
                     headers: {
                         Accept: "application/json",
@@ -72,8 +80,11 @@ const follow = async() => {
                         to:route.params.id
                     }
                 });
-        console.log(data);
-        following.value = true;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            following.value = true;
+        }
     }catch(error){
         console.log(error);
     }
@@ -82,15 +93,18 @@ const follow = async() => {
 const unfollow = async() => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers?to=${route.params.id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followers?to=${route.params.id}`, {
                     method: 'DELETE',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-                console.log(data);
-                following.value = false;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            following.value = false;
+        }
     }catch(error){
         console.log(error);
     }
@@ -104,14 +118,18 @@ const AllAds = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/profile/${route.params.id}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        allAds.value = data.value;
-        allAdsList.value = data.value?.product?.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            allAds.value = data.value;
+            allAdsList.value = data.value?.product?.data;
+        }
     }catch(error){
         console.log(error);
     }
@@ -140,16 +158,18 @@ const loadMoreBtn = async() => {
 const bookmarkAdd = async(id,index) => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
                     method: 'PUT',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if(data){
-            allAdsList.value[index].is_bookmarked = 1;
-        }
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                token.removeToken();
+            } else {
+                allAdsList.value[index].is_bookmarked = 1;
+            }
     }catch(error){
         console.log(error);
     }
@@ -158,16 +178,18 @@ const bookmarkAdd = async(id,index) => {
 const bookmarkRemove = async(id,index) => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
                     method: 'DELETE',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if(data){
-            allAdsList.value[index].is_bookmarked = 0;
-        }
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                token.removeToken();
+            } else {
+                allAdsList.value[index].is_bookmarked = 0;
+            }
     }catch(error){
         console.log(error);
     }

@@ -20,25 +20,29 @@ const AdsView = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/view-product/${route.params.id}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/view-product/${route.params.id}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        adsView.value = data.value?.product;
-        adsSuggestion.value = data.value?.suggestion?.data;
-        showImage.value = adsView.value?.picture[0];
-
-        if(adsView.value){
-            useSeoMeta({
-                title: `${adsView.value?.title ? adsView.value?.title : 'Product View - My Amazing Site'}`,
-                ogTitle: 'My Amazing Site',
-                description: 'This is my amazing site, let me tell you all about it.',
-                ogDescription: 'This is my amazing site, let me tell you all about it.',
-                ogImage: 'image',
-                twitterCard: 'image',
-            })
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            adsView.value = data.value?.product;
+            adsSuggestion.value = data.value?.suggestion?.data;
+            showImage.value = adsView.value?.picture[0];
+    
+            if(adsView.value){
+                useSeoMeta({
+                    title: `${adsView.value?.title ? adsView.value?.title : 'Product View - My Amazing Site'}`,
+                    ogTitle: 'My Amazing Site',
+                    description: 'This is my amazing site, let me tell you all about it.',
+                    ogDescription: 'This is my amazing site, let me tell you all about it.',
+                    ogImage: 'image',
+                    twitterCard: 'image',
+                })
+            }
         }
     }catch(error){
         console.log('Somthing Wrong!');
@@ -87,7 +91,7 @@ const handelReviewSubmit = async() => {
         const modal = new Modal(document.getElementById('reviews-modal'), null);
         const token = useTokenStore();
         try{
-            const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`, {
+            const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review`, {
                         method: 'PUT',
                         headers: {
                             Accept: "application/json",
@@ -99,11 +103,14 @@ const handelReviewSubmit = async() => {
                             comment: form.comment,
                         },
                     });
-                if(data){
-                    modal.hide();
-                    AllReviews(productId.value);
-                    toaster.addSuccess(data.message);
-                }
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                modal.hide();
+                token.removeToken();
+            } else {
+                modal.hide();
+                AllReviews(productId.value);
+                toaster.addSuccess(data.message);
+            }
         }catch(error){
             toaster.addWrong(error.data.message);
         }
@@ -137,14 +144,17 @@ const handelReplySubmit = async(id,index) => {
     const modal = new Modal(document.getElementById('reviews-modal'), null);
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}?review_id=${auth?.user?.id}&reply=${replyText.value[index]}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/review/${id}?review_id=${auth?.user?.id}&reply=${replyText.value[index]}`, {
                     method: 'PATCH',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if(data){
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            modal.hide();
+            token.removeToken();
+        } else {
             modal.hide();
             replyText.value[index] = '';
             reviewReply(id,index);
@@ -180,15 +190,19 @@ const getMessages = async() => {
     
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=0&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=0&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
                     method: 'GET',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        getmessage.value = data.value.data.data.reverse();
-        chatslistlastid.value = data.value.data.data[0].id;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            getmessage.value = data.value.data.data.reverse();
+            chatslistlastid.value = data.value.data.data[0].id;
+        }
     }catch(error){
         toaster.addWrong(error.data.message);
     }
@@ -199,13 +213,16 @@ const loadMoreMsgFun = async(id) => {
     const token = useTokenStore();
     let chats = document?.getElementById('chats');
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=${id}&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/message?amount=20&from_message_id=${id}&with_uuid=${toUuid.value}&product_id=${productsId.value}`, {
                     method: 'GET',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
             if(data.value.data.data.length > 0){
                 loadmoremsgdata.value = data.value.data.data.reverse();
                 chatslistlastid.value = data.value.data.data[0].id;
@@ -246,6 +263,7 @@ const loadMoreMsgFun = async(id) => {
             }else{
                 chatslistlastid.value = 0;
             }
+        }
     }catch(error){
         toaster.addWrong(error.data.message);
     }
@@ -323,7 +341,10 @@ const handelReportSubmit = async() => {
                             desc: report.desc,
                         },
                     });
-            if(data){
+            if (error.value?.data?.message === 'Unauthenticated.') {
+                modal.hide();
+                token.removeToken();
+            } else {
                 modal.hide();
                 toaster.addSuccess(data.message);
             }
@@ -337,49 +358,49 @@ const handelReportSubmit = async() => {
 
 
 // Bookmark
-const bookmarkAdd = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            if(index == 'deto'){
-                // adsView.value?.is_bookmarked = 1;
-            }else{
-                adsSuggestion.value[index].is_bookmarked = 1;
-            }
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
+// const bookmarkAdd = async(id,index) => {
+//     const token = useTokenStore();
+//     try{
+//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+//                     method: 'PUT',
+//                     headers: {
+//                         Accept: "application/json",
+//                         Authorization: `Bearer ${token.getToken}`,
+//                     },
+//                 });
+//         if(data){
+//             if(index == 'deto'){
+//                 // adsView.value?.is_bookmarked = 1;
+//             }else{
+//                 adsSuggestion.value[index].is_bookmarked = 1;
+//             }
+//         }
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
 
-const bookmarkRemove = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            if(index == 'deto'){
-                // adsView.value?.is_bookmarked = 0;
-            }else{
-                adsSuggestion.value[index].is_bookmarked = 0;
-            }
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
+// const bookmarkRemove = async(id,index) => {
+//     const token = useTokenStore();
+//     try{
+//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+//                     method: 'DELETE',
+//                     headers: {
+//                         Accept: "application/json",
+//                         Authorization: `Bearer ${token.getToken}`,
+//                     },
+//                 });
+//         if(data){
+//             if(index == 'deto'){
+//                 // adsView.value?.is_bookmarked = 0;
+//             }else{
+//                 adsSuggestion.value[index].is_bookmarked = 0;
+//             }
+//         }
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
 
 
 const linkcopy = ref(false);

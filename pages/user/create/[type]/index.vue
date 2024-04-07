@@ -6,8 +6,13 @@ definePageMeta({
     middleware: ["auth"]
 });
 
+
+const type_name = ref(null);
+const type_image = ref(null);
 onMounted(() => {
     initFlowbite();
+    type_name.value = localStorage.getItem("type_name");
+    type_image.value = localStorage.getItem("type_image");
 })
 
 useSeoMeta({
@@ -28,7 +33,7 @@ const categoryId = ref(null);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${route.params.type}`);
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
         } else {
@@ -47,20 +52,40 @@ getCetagories();
             <UserSidebar></UserSidebar>
 
             <div class="w-[calc(100%-basis-72)] w-full">
-                <div class="mx-auto w-full max-w-screen-sm">
-                    <div class="bg-gray-100 rounded-md px-4 py-5">
-                        <h4 class="text-lg font-semibold mb-3">Choose Category</h4>
-                        <div class="col-span-2 sm:col-span-1">
-                            <select id="categories"
-                                v-model="categoryId"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option disabled value="null">Category</option>
-                                <option v-for="(cat,index) in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                            </select>
+                <div class=" w-full max-w-screen-lg">
+                    <div class="px-4 py-5">
+                        <div class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+                            
+                            <div class="w-full max-w-sm bg-gray-100 rounded-md border border-gray-200 shadow dark:bg-gray-800 dark:border-gray-700">
+                                <div class="flex items-center gap-x-2 px-4 py-2">
+                                    <div class="bg-gray-700 rounded-md">
+                                        <img class="w-12 h-12" :src="useRuntimeConfig().public.imageUrl+'/'+type_image" alt="image"/>
+                                    </div>
+                                    <h5 class="mb-1 text-xl text-center font-medium text-gray-900 dark:text-white">
+                                        <h4 class="text-md text-gray-600 font-semibold">{{ type_name }}</h4>
+                                    </h5>
+                                </div>
+                            </div>
+
                         </div>
-                        <nuxt-link :to="`/user/create/${route.params.type}/${categoryId}`" class=" mt-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            Continue
-                        </nuxt-link>
+                    </div>
+
+                    <div class="rounded-md px-4 py-5">
+                        <h4 class="text-lg font-semibold mb-5">Sellect Category</h4>
+                        <div class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+                            
+                            <div v-for="(cat,index) in categories" :key="index" class="w-full max-w-sm bg-gray-100 rounded-md border border-gray-200 shadow dark:bg-gray-800 dark:border-gray-700">
+                                <nuxt-link :to="`/user/create/${route.params.type}/${cat.id}`" class="flex items-center gap-x-2 px-4 py-2">
+                                    <!-- <div class="p-0.5 rounded-md">
+                                        <img class="w-12 h-12" :src="useRuntimeConfig().public.imageUrl+'/'+cat.image" alt="image"/>
+                                    </div> -->
+                                    <h5 class="mb-1 text-xl text-center font-medium text-gray-900 dark:text-white">
+                                        <h4 class="text-sm text-gray-600 font-semibold">{{ cat.name }}</h4>
+                                    </h5>
+                                </nuxt-link>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>

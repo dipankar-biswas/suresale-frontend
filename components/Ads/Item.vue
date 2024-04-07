@@ -10,14 +10,17 @@ const common = useCommonFun();
 const bookmarkAdd = async(product) => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
                     method: 'PUT',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if(data){
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+            console.log('SDFie');
+        } else {
             product.is_bookmarked = 1;
         }
     }catch(error){
@@ -28,14 +31,16 @@ const bookmarkAdd = async(product) => {
 const bookmarkRemove = async(product) => {
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
                     method: 'DELETE',
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if(data){
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
             product.is_bookmarked = 0;
         }
     }catch(error){

@@ -25,13 +25,17 @@ const getSearchData = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/search?${queryParams}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/search?${queryParams}`,{
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        categoryDatas.value = data.value.data;
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
+            categoryDatas.value = data.value.data;
+        }
     }catch(error){
         console.log('Somthing Wrong!');
     }

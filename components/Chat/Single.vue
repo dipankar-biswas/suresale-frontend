@@ -42,7 +42,9 @@ const handelSubmit = async() => {
                         from_uuid: auth?.user?.id?.toString(),
                     },
                 });
-        if(data){
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } else {
             loadbtn.value = false;
             msgid.value = props.getmessage[props.getmessage.length - 1].id + 1;
             let newChatMsg = '';

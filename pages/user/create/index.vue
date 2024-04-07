@@ -70,20 +70,16 @@ const activeFun = async(id,index) => {
     try{
         categories.value = [];
         const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories?parent_id=${id}`);
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
-            if(data.value.data.length == 0 || data.value.data == null){
-                const modal = new Modal(document.getElementById('categoryselect-modal'), null);
-                if(typeId.value != null && categoryId.value != null){
-                    modal.hide();
-                    return navigateTo(`/user/create/${typeId.value}/${categoryId.value}`);
-                }
-            }else {
-                isActive.value = [];
-                categories.value = data.value.data;
-                loading.value = false;
+        if(data.value.data.length == 0 || data.value.data == null){
+            const modal = new Modal(document.getElementById('categoryselect-modal'), null);
+            if(typeId.value != null && categoryId.value != null){
+                modal.hide();
+                return navigateTo(`/user/create/${typeId.value}/${categoryId.value}`);
             }
+        }else {
+            isActive.value = [];
+            categories.value = data.value.data;
+            loading.value = false;
         }
         
     }catch(error){
@@ -100,6 +96,13 @@ const actionSubmit = async() => {
     }
 }
 
+
+const CacheType = (type) => {
+    localStorage.setItem("type_name", type.name);
+    localStorage.setItem("type_image", type.image);
+    return navigateTo(`/user/create/${type.id}`);
+}
+
 </script>
 <template>    
     <div class="content">
@@ -114,10 +117,10 @@ const actionSubmit = async() => {
                         <div class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-6 gap-y-5">
                             
                             <div v-for="(type,index) in adstype" :key="type.id" class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                                <div @click="showCategory(type)" class="flex flex-col items-center px-6 pt-6 pb-8">
+                                <div @click="CacheType(type)" class="cursor-pointer flex flex-col items-center px-6 pt-6 pb-8">
                                     <img class="w-24 h-24 mb-3 rounded-full shadow-lg" :src="useRuntimeConfig().public.imageUrl+'/'+type.image" alt="image"/>
                                     <h5 class="mb-1 text-xl text-center font-medium text-gray-900 dark:text-white">
-                                        <h4 class="text-md text-gray-600">{{ type.name }}</h4>
+                                        <h4 class="text-md text-gray-600 capitalize">{{ type.name }}</h4>
                                     </h5>
                                 </div>
                             </div>
