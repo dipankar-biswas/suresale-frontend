@@ -37,7 +37,7 @@ const getSearchData = async() => {
             categoryDatas.value = data.value.data;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 getSearchData();
@@ -130,7 +130,7 @@ const loadMoreBtn = async() => {
         categoryDatas.value.push(...data.value.data);
         loadbtn.value = false;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
         loadbtn.value = false;
     }
 }

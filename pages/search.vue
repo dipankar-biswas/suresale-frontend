@@ -147,7 +147,7 @@ const loadMoreBtn = async() => {
         searchDatas.value.push(...data.value.data);
         loadbtn.value = false;
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
         loadbtn.value = false;
     }
 }
@@ -169,7 +169,7 @@ const bookmarkAdd = async(id,index) => {
             searchDatas.value[index].is_bookmarked = 1;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 
@@ -187,7 +187,7 @@ const bookmarkRemove = async(id,index) => {
             searchDatas.value[index].is_bookmarked = 0;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 </script>

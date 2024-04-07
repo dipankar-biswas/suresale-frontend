@@ -213,14 +213,15 @@ const bookmarkRemove = async(id,index) => {
                             <div class="tooltip-arrow" data-popper-arrow></div>
                         </div>
                     </div>
-                    <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" />
+                    <div class="w-full h-64 rounded-lg bg-gray-500/40" ></div>
+                    <!-- <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" /> -->
                 </div>
                 <div class="mx-auto w-full bg-whiterounded-lg dark:bg-gray-800">
                     <div class="flex">
                         <div class="w-1/4"></div>
                         <div class="w-2/4 flex flex-col items-center pb-10 -mt-14">
                             <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
-                                <img class="w-28 h-28 rounded-full p-1" v-if="allAds?.profile_picture" :src="useRuntimeConfig().public.imageUrl+allAds?.profile_picture" alt="Bonnie image"/>
+                                <img class="w-28 h-28 rounded-full p-1" v-if="allAds?.profile_picture" :src="common?.defaultProfilePic(allAds?.profile_picture) == 0 ? allAds?.profile_picture : useRuntimeConfig().public.imageUrl+allAds?.profile_picture" alt="Bonnie image"/>
                                 <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="Bonnie image"/>
                             </div>
                             <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ allAds?.name }}</h5>

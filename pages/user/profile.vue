@@ -218,7 +218,8 @@ const planSubmit = async(event) => {
                                 <div class="tooltip-arrow" data-popper-arrow></div>
                             </div>
                         </div>
-                        <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" />
+                        <div class="w-full h-64 rounded-lg bg-gray-500/40" ></div>
+                        <!-- <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" /> -->
                     </div>
 
                     <div class="mx-auto w-full bg-whiterounded-lg dark:bg-gray-800">

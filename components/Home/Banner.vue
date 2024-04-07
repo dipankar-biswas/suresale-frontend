@@ -49,8 +49,8 @@ watch(() => form.category, async (currentValue) => {
 
 </script>
 <template>
-    <!-- assets/images/slider/slider-1.webp -->
-    <div class="banner w-full h-40 bg-center bg-no-repeat bg-cover" :style="`background-image: url(${imagePath})`">
+    <!-- <div class="banner w-full h-40 bg-center bg-no-repeat bg-cover" :style="`background-image: url(${imagePath})`"> -->
+    <div class="banner w-full h-40 bg-gray-500/40 bg-center bg-no-repeat bg-cover">
         <div class="max-w-screen-2xl flex flex-wrap items-center justify-between h-full mx-auto p-4">
         
             <form class="flex justify-center w-full">

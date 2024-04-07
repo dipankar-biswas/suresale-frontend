@@ -41,7 +41,7 @@ const Reports = async() => {
             reports.value = data.value.data;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 Reports();
@@ -91,7 +91,7 @@ const reportDeleteBtn = async() => {
             modal.hide();
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 

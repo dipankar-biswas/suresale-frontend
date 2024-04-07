@@ -40,7 +40,7 @@ const pdtReviews = async() => {
             pdtreviews.value = data.value.data.data;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 pdtReviews();

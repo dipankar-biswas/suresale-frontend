@@ -45,7 +45,7 @@ const AdsView = async() => {
             }
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 AdsView();
@@ -69,7 +69,7 @@ const AllReviews = async() => {
         allReviews.value = data.value.data.data;
         reviewsendckeck.value = allReviews.value.find(item => item?.user?.id === auth?.user?.id);
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 AllReviews();

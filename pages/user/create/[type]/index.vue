@@ -40,7 +40,7 @@ const getCetagories = async() => {
             categories.value = data.value.data;
         }
     }catch(error){
-        console.log('Somthing Wrong!');
+        console.log(error);
     }
 }
 getCetagories();
