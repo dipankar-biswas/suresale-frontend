@@ -3,17 +3,17 @@ const common = useCommonFun();
 
 // const totalcat = ref(0);
 const categories = ref([
-    {id: 2, name: 'Aircraft', slug: 'aircraft', image: 'storage/category/aircraft.svg', desc: null,},
-    {id: 13, name: 'Cars', slug: 'cars', image: 'storage/category/cars.svg', desc: null,},
-    {id: 14, name: 'Classic Cars', slug: 'classic-cars', image: 'storage/category/classic-cars.svg', desc: null, },
-    {id: 293, name: 'Insurance', slug: 'insurance', image: 'storage/category/insurance.svg', desc: null, },
-    {id: 16, name: 'Motorcycles', slug: 'motorcycles', image: 'storage/category/motorcycles.svg', desc: null, },
-    {id: 298, name: 'Office Services', slug: 'office-services', image: 'storage/category/office-services.svg', desc: null, },
-    {id: 278, name: 'Tickets', slug: 'tickets', image: 'storage/category/tickets.svg', desc: null, },
-    {id: 20, name: 'Trucks', slug: 'trucks', image: 'storage/category/trucks.svg', desc: null, },
-    {id: 31, name: 'for rent', slug: 'for-rent', image: 'storage/category/for-rent.svg', desc: null, },
-    {id: 24, name: 'for sale', slug: 'for-sale', image: 'storage/category/for-sale.svg', desc: null,},
-    {id: 0, name: 'All Categories', slug: 'all-categories', image: null, desc: null,},
+    {id: 12, name: 'Cars', slug: 'cars', image: 'storage/category/home/cars.svg', desc: null, },
+    {id: 15, name: 'Motorcycles', slug: 'motorcycles', image: 'storage/category/home/motorcycle.svg', desc: null, },
+    {id: 23, name: 'Property', slug: 'property', image: 'storage/category/home/property.svg', desc: null,},
+    {id: 115, name: 'Computers', slug: 'computers', image: 'storage/category/home/computers.svg', desc: null, },
+    {id: 293, name: 'Mobile', slug: 'mobile', image: 'storage/category/home/mobile.svg', desc: null, },
+    {id: 16, name: 'Furniture', slug: 'furniture', image: 'storage/category/home/furniture.svg', desc: null, },
+    {id: 61, name: 'Books', slug: 'books', image: 'storage/category/home/books.svg', desc: null, },
+    {id: 247, name: 'Pets', slug: 'pets', image: 'storage/category/home/pets.svg', desc: null, },
+    {id: 115, name: 'Camera', slug: 'camera', image: 'storage/category/home/camera.svg', desc: null,},
+    {id: 291, name: 'Services', slug: 'services', image: 'storage/category/home/services.svg', desc: null,},
+    {id: 0, name: 'All...', slug: 'all-categories', image: 'storage/category/home/all-category.svg', desc: null,},
 ]);
 // const getCetagories = async() => {
 //     refreshNuxtData();
@@ -111,7 +111,7 @@ const loadMoreCatBtn = async() => {
             for(let i = 0; i<data.value?.categories?.data?.length; i++) {
                 newSlide += `
                         <div draggable class="slide w-full h-44 flex justify-center items-center text-center" style="min-width:${singleWidth.value?.toFixed(3)}px;">
-                            <nuxt-link :to="/category/${data.value?.categories?.data[i]?.id}" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 hover:scale-105 hover:bg-gray-100">
+                            <nuxt-link :to="/category/${data.value?.categories?.data[i]?.slug}" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 hover:scale-105 hover:bg-gray-100">
                                 <div class="image bg-zinc-300 rounded-full w-16 h-16 flex justify-center items-center">
                                     <img src="" alt="Image" class="w-full h-full object-cover">
                                 </div>
@@ -137,16 +137,16 @@ const loadMoreCatBtn = async() => {
             <!-- <h5>See All</h5> -->
         </div>
         <div class="relative">
-            <div class="slider-container slider-categories flex overflow-hidden">
+            <div class="slider-container slider-categories overflow-hidden">
                 <div class="sliders grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-11" id="sliderContent">
 
-                    <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full h-44 flex justify-center items-center text-center">
-                        <nuxt-link :to="`/category/${cat.id}`" class="flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] p-2 ease-in-out hover:scale-105 hover:bg-gray-100">
+                    <div v-for="(cat,index) in categories" :key="index" draggable class="slide w-full flex justify-center items-center text-center">
+                        <nuxt-link :to="`/category/${cat.slug}`" class="py-4 flex flex-col items-center rounded-md w-[calc(100%-6px)] h-[calc(100%-6px)] px-2 ease-in-out hover:scale-105 hover:bg-gray-100">
                             <div class="image bg-gray-100 rounded-full w-16 h-16 flex justify-center items-center">
-                                <img :src="useRuntimeConfig().public.imageUrl+'/'+cat.image" alt="Image" class="w-8 h-8 object-cover">
+                                <img :src="useRuntimeConfig().public.imageUrl+'/'+cat.image" alt="Image" class="w-12 h-12 object-cover">
                             </div>
-                            <h4 class="title font-semibold leading-">{{ cat.name }}</h4>
-                            <p class="text-gray-400 text-xs leading-0">{{ cat.product_count }} ads</p>
+                            <h4 class="title text-xs sm:text-sm font-semibold leading-7">{{ cat.name }}</h4>
+                            <!-- <p class="text-gray-400 text-xs leading-0">{{ cat.product_count }} ads</p> -->
                         </nuxt-link>
                     </div>
                     <!-- <div @click="loadMoreCatBtn" class="slide w-full h-44 flex justify-center items-center text-center">
@@ -163,7 +163,7 @@ const loadMoreCatBtn = async() => {
                 </div>
             </div>
     
-            <div class="arrow block lg:hidden">
+            <div class="arrow hidden">
                 <span @click="prev()" class="prev absolute left-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-gray-200/50 hover:bg-gray-200 cursor-pointer">
                     <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>

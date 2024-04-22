@@ -39,6 +39,7 @@ const stateCheckedFun = (event) => {
     stateCheckData.value = event
 }
 
+const loading = ref(false);
 const searchDatas = ref([]);
 const getSearchDatas = async(value, action) => {
     let obj;
@@ -53,14 +54,17 @@ const getSearchDatas = async(value, action) => {
     }else if(action == 'location'){
         obj = { location:value }
     }
+    loading.value = true;
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/filter`,{
             method: 'POST',
             body: obj
         });
         searchDatas.value = data.value.data;
+        loading.value = false;
     }catch(error){
         console.log(error);
+        loading.value = false;
     }
 }
 
@@ -94,8 +98,9 @@ watch(() => stateCheckData.value, async (currentValue) => {
 );
 
 
-
+const totalads = ref(null);
 const getSearchData = async() => {
+    loading.value = true;
     refreshNuxtData();
     const token = useTokenStore();
     try{
@@ -106,8 +111,11 @@ const getSearchData = async() => {
             },
         });
         searchDatas.value = data.value.data;
+        totalads.value = data.value.total;
+        loading.value = false;
     }catch(error){
         console.log(error);
+        loading.value = false;
     }
 }
 getSearchData();
@@ -119,6 +127,7 @@ const popularSearchFun = (event) => {
 }
 // Popular Search
 watch(() => popularsearch.value, async (currentValue) => {
+    loading.value = true;
     refreshNuxtData();
     const token = useTokenStore();
     try{
@@ -129,8 +138,10 @@ watch(() => popularsearch.value, async (currentValue) => {
             },
         });
         searchDatas.value = data.value.data;
+        loading.value = false;
     }catch(error){
         console.log(error);
+        loading.value = false;
     }
   },
   {deep: true}
@@ -142,54 +153,19 @@ const page = ref(1);
 const loadMoreBtn = async() => {
     loadbtn.value = true;
     page.value++;
+    loading.value = true;
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}?page=${page.value}`);
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/search?page=${page.value}`);
         searchDatas.value.push(...data.value.data);
         loadbtn.value = false;
+        loading.value = false;
     }catch(error){
         console.log(error);
         loadbtn.value = false;
+        loading.value = false;
     }
 }
 
-
-
-// Bookmark
-const bookmarkAdd = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            searchDatas.value[index].is_bookmarked = 1;
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
-
-const bookmarkRemove = async(id,index) => {
-    const token = useTokenStore();
-    try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token.getToken}`,
-                    },
-                });
-        if(data){
-            searchDatas.value[index].is_bookmarked = 0;
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
 </script>
 <template>
     <div class="content">
@@ -202,27 +178,19 @@ const bookmarkRemove = async(id,index) => {
                     <nav class="flex mb-3" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                             <li class="inline-flex items-center">
-                                <a href="#" class="inline-flex items-center text-xs font-normal text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                                <nuxt-link to="/" class="inline-flex items-center text-xs font-normal text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
                                     <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
                                     </svg>
                                     Home
-                                </a>
-                            </li>
-                            <li>
-                                <div class="flex items-center">
-                                    <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                                    </svg>
-                                    <a href="#" class="ms-1 text-xs font-normal text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white">Projects</a>
-                                </div>
+                                </nuxt-link>
                             </li>
                             <li aria-current="page">
                                 <div class="flex items-center">
                                     <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
                                     </svg>
-                                    <span class="ms-1 text-xs font-normal text-gray-500 md:ms-2 dark:text-gray-400">Flowbite</span>
+                                    <span class="ms-1 text-xs font-normal text-gray-500 md:ms-2 dark:text-gray-400 capitalize">{{  route?.query?.name?.replaceAll('-',' ') }}</span>
                                 </div>
                             </li>
                         </ol>
@@ -261,14 +229,21 @@ const bookmarkRemove = async(id,index) => {
 
                     <!-- Ads -->
                     <div class="mx-auto w-full max-w-screen-2xl px-4 py-2">
+                        <p v-if="route?.query?.search" class="text-gray-500 text-xs mb-2.5"><span class="text-gray-900 font-semibold">Search</span> : {{ route?.query?.search }}</p>
                         <div class="bg-white">
-                            <div class="w-full">
+                            <div v-if="!loading" class="w-full">
                                 <div v-if="searchDatas" class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-5">
                                     <AdsItem v-for="(ads,index) in searchDatas" :key="ads.id" :adsItem="ads"></AdsItem>
                                 </div>
                             </div>
 
-                            <!-- <div class="flex justify-center mt-8">
+                            <div v-else class="w-full">
+                                <div class="item px-4 py-1.5 my-6 flex justify-center items-center">
+                                    <img src="assets/images/loader.gif" alt="Loading..." class="flex w-6">
+                                </div>
+                            </div>
+
+                            <div v-if="searchDatas.length < totalads" class="flex justify-center mt-8">
                                 <button @click="loadMoreBtn" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-600 focus:outline-none bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                                     <div class="flex items-center justify-center gap-x-2">
                                         <div role="status" v-if="loadbtn">
@@ -281,7 +256,7 @@ const bookmarkRemove = async(id,index) => {
                                         <span>Load More</span>
                                     </div>
                                 </button>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>

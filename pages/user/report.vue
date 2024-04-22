@@ -10,10 +10,10 @@ onMounted(() => {
     initFlowbite();
 })
 useSeoMeta({
-  title: 'Reports - My Amazing Site',
-  ogTitle: 'My Amazing Site',
-  description: 'This is my amazing site, let me tell you all about it.',
-  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  title: 'Reports - A Bangladeshi Local Marketplace',
+  ogTitle: 'Reports - A Bangladeshi Local Marketplace',
+  description: 'A Bangladeshi Local Marketplace',
+  ogDescription: 'A Bangladeshi Local Marketplace',
   ogImage: 'image',
   twitterCard: 'image',
 })
@@ -21,6 +21,7 @@ useSeoMeta({
 const token = useTokenStore();
 const datetime = useDateTime();
 const common = useCommonFun();
+const toaster = useToasterStore();
 
 
 const reports = ref([]);
@@ -78,20 +79,24 @@ const reportDeleteBtn = async() => {
     
     
     try{
-        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report/${reportDeleteId.value}`,{
+        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/report/${reportDeleteId.value}`,{
             method: 'DELETE',
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${token.getToken}`,
             },
         });
-        
+        if (error.value?.data?.message === 'Unauthenticated.') {
+            token.removeToken();
+        } 
         if(data){
             Reports();
             modal.hide();
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 

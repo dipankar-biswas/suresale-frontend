@@ -10,10 +10,10 @@ onMounted(() => {
     initFlowbite();
 })
 useSeoMeta({
-  title: 'My Profile - My Amazing Site',
-  ogTitle: 'My Amazing Site',
-  description: 'This is my amazing site, let me tell you all about it.',
-  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  title: 'My Profile - A Bangladeshi Local Marketplace',
+  ogTitle: 'My Profile - A Bangladeshi Local Marketplace',
+  description: 'A Bangladeshi Local Marketplace',
+  ogDescription: 'A Bangladeshi Local Marketplace',
   ogImage: 'image',
   twitterCard: 'image',
 })
@@ -21,6 +21,7 @@ useSeoMeta({
 const auth = useAuthStore();
 const token = useTokenStore();
 const common = useCommonFun();
+const toaster = useToasterStore();
 
 
 
@@ -53,7 +54,8 @@ const followers = async() => {
                 });
             if (error.value?.data?.message === 'Unauthenticated.') {
                 token.removeToken();
-            } else {
+            }
+            if(data){
                 followersData.value = data.value.data;
                 follower.value = followersData.value.length;
             }
@@ -142,8 +144,12 @@ const profilePicUpdateBtn = async() => {
 // Account Switch
 const Business = async() => {
     const modal = new Modal(document.getElementById('price-modal'), null);
-    modal.show();
-    BusinessPackages();
+    if((auth?.user?.email == null || auth?.user?.email == '') || (auth?.user?.mobile == null || auth?.user?.mobile == '')){
+        toaster.addInfo('Please Profile Information Complete.');
+    }else{
+        modal.show();
+        BusinessPackages();
+    }
 }
 
 const loading = ref(false);
@@ -161,7 +167,8 @@ const BusinessPackages = async() => {
                 });
             if (error.value?.data?.message === 'Unauthenticated.') {
                 token.removeToken();
-            } else {
+            }
+            if(data){
                 loading.value = false;
                 businesspackages.value = data.value;
             }
@@ -188,10 +195,12 @@ const planSubmit = async(event) => {
             loadbtn3.value = false;
             success_msg3.value = data.message;
             modal.hide();
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         errors3.value = error.data.errors;
         loadbtn3.value = false;
+        toaster.addWrong(error.data?.message);
     }
 }
 
@@ -206,7 +215,7 @@ const planSubmit = async(event) => {
                 <div class="mx-auto w-full max-w-screen-2xl">
                     
                     <div class="group relative">
-                        <div class="absolute w-full h-64 bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
+                        <!-- <div class="absolute w-full h-64 bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
                             <button data-tooltip-target="download-image" class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
                                 <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                     <path fill-rule="evenodd" d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z" clip-rule="evenodd"/>
@@ -217,8 +226,8 @@ const planSubmit = async(event) => {
                                 Banner image Change
                                 <div class="tooltip-arrow" data-popper-arrow></div>
                             </div>
-                        </div>
-                        <div class="w-full h-64 rounded-lg bg-gray-500/40" ></div>
+                        </div> -->
+                        <div class="w-full h-64 rounded-lg bg-[#2FA84F]" ></div>
                         <!-- <img src="/assets/images/slider/slider-1.webp" class="w-full h-64 rounded-lg" /> -->
                     </div>
 
@@ -226,7 +235,15 @@ const planSubmit = async(event) => {
                         <div class="flex">
                             <div class="w-1/4"></div>
                             <div class="w-2/4 flex flex-col items-center pb-10 -mt-14">
-                                <div class="border-2 bg-white border-gray-300 rounded-full shadow-lg mb-3 relative z-10">
+                                <div class="relative group border-2 rounded-full bg-white border-gray-300 shadow-lg mb-3 relative z-10">
+                                    <div class="absolute w-full h-full bg-gray-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full flex items-center justify-center">
+                                        <button data-modal-target="profilepic-modal" data-modal-toggle="profilepic-modal" class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
+                                            <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                                <path fill-rule="evenodd" d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z" clip-rule="evenodd"/>
+                                                <path fill-rule="evenodd" d="M19.8 4.3a2.1 2.1 0 0 0-1-1.1 2 2 0 0 0-2.2.4l-.6.6 2.9 3 .5-.6a2.1 2.1 0 0 0 .6-1.5c0-.2 0-.5-.2-.8Zm-2.4 4.4-2.8-3-4.8 5-.1.3-.7 3c0 .3.3.7.6.6l2.7-.6.3-.1 4.7-5Z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                     <img class="w-28 h-28 rounded-full p-1" v-if="auth?.user?.profile_picture" :src="common?.defaultProfilePic(auth?.user?.profile_picture) == 0 ? auth?.user?.profile_picture : useRuntimeConfig().public.imageUrl+auth?.user?.profile_picture" alt="image"/>
                                     <img class="w-28 h-28 rounded-full p-1" v-else src="/assets/images/avatar.png" alt="image"/>
                                 </div>
@@ -385,7 +402,7 @@ const planSubmit = async(event) => {
         </div>
 
         <!-- Main modal -->
-        <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div id="profilepic-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="relative p-4 w-full max-w-xl max-h-full">
                 <!-- Modal content -->
                 <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -395,7 +412,7 @@ const planSubmit = async(event) => {
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Profile Picture Change
                             </h3>
-                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="profilepic-modal">
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                 </svg>
@@ -422,8 +439,8 @@ const planSubmit = async(event) => {
                         </div>
                         <!-- Modal footer -->
                         <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                            <button data-modal-hide="default-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save & Change</button>
-                            <button data-modal-hide="default-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Cancel</button>
+                            <button data-modal-hide="profilepic-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save & Change</button>
+                            <button data-modal-hide="profilepic-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Cancel</button>
                         </div>
                     </form>
                 </div>

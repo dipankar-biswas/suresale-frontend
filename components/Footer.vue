@@ -20,7 +20,6 @@ onMounted(() => {
     // Function to check if a cookie exists
     function checkCookie(cookieName) {
         var cookies = document.cookie.split(';');
-        console.log(document.cookie);
         for (var i = 0; i < cookies.length; i++) {
             var cookie = cookies[i].trim();
             if (cookie.startsWith(cookieName + '=')) {
@@ -63,12 +62,6 @@ const updateCountdown = (targetDate) => {
         return "Countdown expired";
     }
 }
-
-
-
-
-
-
 
 
 </script>

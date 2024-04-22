@@ -7,11 +7,11 @@
 
     <div class="header sticky top-0 z-20 shadow-lg">
         <nav class="bg-green-100 dark:bg-gray-900 w-full z-20 start-0 border-b border-gray-200 dark:border-gray-600 overflow-hidden">
-            <div class="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <div class="max-w-screen-2xl flex items-center justify-between mx-auto p-4">
                 <div class="flex items-center relative">
-                    <div class="gap-x-7 after:absolute after:content-[''] after:bg-red-500 after:w-36 after:h-4 after:top-0 after:rotate-45 after:-right-2/4 sm:after:-right-3/4">
+                    <div class="gap-x-7 after:absolute after:content-[''] after:bg-red-500 after:w-36 after:h-2 sm:after:h-4 after:top-0 after:rotate-45 after:-right-16 sm:after:-right-3/4">
                         <NuxtLink to="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-                            <img src="assets/images/suresale-logo.svg" class="h-8" alt="Logo"/>
+                            <img src="assets/images/suresale-logo.svg" class="h-6 sm:h-8" alt="Logo"/>
                             <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"></span>
                         </NuxtLink>
                     </div>
@@ -19,26 +19,26 @@
                 <div class="flex md:order-1 space-x-3 md:space-x-0 rtl:space-x-reverse">
                     <div>
                         <template v-if="!token.getStatus">
-                            <ul class="font-normal md:font-medium flex items-center gap-x-4 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                            <ul class="font-normal md:font-medium flex items-center gap-x-2 sm:gap-x-4 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
                                 <li>
-                                    <div data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer">
-                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <div data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-4 h-4 sm:w-6 sm:h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="m12.75 20.66 6.184-7.098c2.677-2.884 2.559-6.506.754-8.705-.898-1.095-2.206-1.816-3.72-1.855-1.293-.034-2.652.43-3.963 1.442-1.315-1.012-2.678-1.476-3.973-1.442-1.515.04-2.825.76-3.724 1.855-1.806 2.201-1.915 5.823.772 8.706l6.183 7.097c.19.216.46.34.743.34a.985.985 0 0 0 .743-.34Z"/>
                                         </svg>
                                     </div>
                                 </li>
                                 <li>
-                                    <div data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer">
-                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <div data-modal-target="logincheck-modal" data-modal-toggle="logincheck-modal" class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-4 h-4 sm:w-6 sm:h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M3.559 4.544c.355-.35.834-.544 1.33-.544H19.11c.496 0 .975.194 1.33.544.356.35.559.829.559 1.331v9.25c0 .502-.203.981-.559 1.331-.355.35-.834.544-1.33.544H15.5l-2.7 3.6a1 1 0 0 1-1.6 0L8.5 17H4.889c-.496 0-.975-.194-1.33-.544A1.868 1.868 0 0 1 3 15.125v-9.25c0-.502.203-.981.559-1.331ZM7.556 7.5a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2h-8Zm0 3.5a1 1 0 1 0 0 2H12a1 1 0 1 0 0-2H7.556Z" clip-rule="evenodd"/>
                                         </svg>
                                     </div>
                                 </li>
                                 <li>
-                                    <nuxt-link to="/auth/register" class="text-white flex items-center w-full gap-x-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-sm px-3 py-1.5 text-center">Register</nuxt-link>
+                                    <nuxt-link to="/auth/register" class="text-white flex items-center w-full gap-x-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 text-center">Register</nuxt-link>
                                 </li>
                                 <li>
-                                    <nuxt-link to="/auth/login" class="text-white flex items-center w-full gap-x-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-sm px-3 py-1.5 text-center">Login</nuxt-link>
+                                    <nuxt-link to="/auth/login" class="text-white flex items-center w-full gap-x-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 text-center">Login</nuxt-link>
                                 </li>
                             </ul>
                         </template>

@@ -11,10 +11,10 @@ onMounted(() => {
 })
 
 useSeoMeta({
-    title: 'Chat Messages - My Amazing Site',
-    ogTitle: 'My Amazing Site',
-    description: 'This is my amazing site, let me tell you all about it.',
-    ogDescription: 'This is my amazing site, let me tell you all about it.',
+    title: 'Chat Messages - A Bangladeshi Local Marketplace',
+    ogTitle: 'Chat Messages - A Bangladeshi Local Marketplace',
+    description: 'A Bangladeshi Local Marketplace',
+    ogDescription: 'A Bangladeshi Local Marketplace',
     ogImage: 'image',
     twitterCard: 'image',
 })

@@ -1,2 +1,0 @@
-1. Announcement
-//@todo: One Click Functin Double Call

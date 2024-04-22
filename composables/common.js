@@ -5,7 +5,9 @@ export const useCommonFun = () => {
             .replace(/[\u0300-\u036f]/g, '') // remove all the accents, which happen to be all in the \u03xx UNICODE block.
             .trim() // trim leading or trailing whitespace
             .toLowerCase() // convert to lowercase
-            .replace(/[^a-z0-9 -]/g, '') // remove non-alphanumeric characters
+            // .replace(/[^a-z0-9 -]/g, '') // remove non-alphanumeric characters
+            .replace(/[/]/g, '')  // Remove non-word characters except spaces and dashes
+            .replace(/[?#@$%]/g, '') // Remove specific characters: ?, #, @, %, $
             .replace(/\s+/g, '-') // replace spaces with hyphens
             .replace(/-+/g, '-'); // remove consecutive hyphens
     }
@@ -21,6 +23,12 @@ export const useCommonFun = () => {
         else
             return text;
     };
+
+
+    // Price Comma Format
+    function formatPrice(price) {
+        return price?.toFixed(2)?.replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
 
 
     // Image Zoom
@@ -51,7 +59,7 @@ export const useCommonFun = () => {
         return data?.indexOf("https://placehold.co");
     }
   
-    return { convertToSlug, parseText, imageZoom, defaultProfilePic }
+    return { convertToSlug, parseText, formatPrice, imageZoom, defaultProfilePic }
   }
 
   

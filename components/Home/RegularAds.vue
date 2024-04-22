@@ -1,12 +1,13 @@
 <script setup>
 const auth = useAuthStore();
 
-
-
 const regularAds = ref([]);
+const totalads = ref(null);
+const loading = ref(false);
 const RegularAds = async() => {
     refreshNuxtData();
     const token = useTokenStore();
+    loading.value = true;
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}`,{
             headers: {
@@ -15,8 +16,11 @@ const RegularAds = async() => {
             },
         });
         regularAds.value = data.value.data;
+        totalads.value = data.value.total;
+        loading.value = false;
     }catch(error){
         console.log(error);
+        loading.value = false;
     }
 }
 RegularAds();
@@ -26,53 +30,18 @@ const page = ref(1);
 const loadMoreBtn = async() => {
     loadbtn.value = true;
     page.value++;
+    loading.value = true;
     try{
         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}?page=${page.value}`);
         regularAds.value.push(...data.value.data);
         loadbtn.value = false;
+        loading.value = false;
     }catch(error){
         console.log(error);
         loadbtn.value = false;
+        loading.value = false;
     }
 }
-
-
-// Bookmark
-// const bookmarkAdd = async(id,index) => {
-//     const token = useTokenStore();
-//     try{
-//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-//                     method: 'PUT',
-//                     headers: {
-//                         Accept: "application/json",
-//                         Authorization: `Bearer ${token.getToken}`,
-//                     },
-//                 });
-//         if(data){
-//             regularAds.value[index].is_bookmarked = 1;
-//         }
-//     }catch(error){
-//         console.log(error);
-//     }
-// }
-
-// const bookmarkRemove = async(id,index) => {
-//     const token = useTokenStore();
-//     try{
-//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
-//                     method: 'DELETE',
-//                     headers: {
-//                         Accept: "application/json",
-//                         Authorization: `Bearer ${token.getToken}`,
-//                     },
-//                 });
-//         if(data){
-//             regularAds.value[index].is_bookmarked = 0;
-//         }
-//     }catch(error){
-//         console.log(error);
-//     }
-// }
 
 </script>
 
@@ -89,14 +58,19 @@ const loadMoreBtn = async() => {
             <div class="title flex justify-between items-center gap-3 px-3 py-3 border-b-2 mb-4">
                 <h4 class="text-xl font-semibold">Todays Ads</h4>
             </div>
-            <div class="flex flex-cols-1 lg:flex-cols-2 gap-x-5 gap-y-5 h-full">
+            <div v-if="!loading" class="flex flex-cols-1 lg:flex-cols-2 gap-x-5 gap-y-5 h-full">
                 <div v-if="regularAds" class="adses rounded grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5">
                     
                     <AdsItem v-for="(ads,index) of regularAds" :key="ads.id" :adsItem="ads"></AdsItem>
 
                 </div>
             </div>
-            <div class="flex justify-center mt-8">
+            <div v-else class="flex flex-cols-1 lg:flex-cols-2 gap-x-5 gap-y-5 h-full">
+                <div class="item px-4 py-1.5 my-6 flex justify-center items-center">
+                    <img src="assets/images/loader.gif" alt="Loading..." class="flex w-6">
+                </div>
+            </div>
+            <div v-if="regularAds.length < totalads" class="flex justify-center mt-8">
                 <button @click="loadMoreBtn" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-600 focus:outline-none bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                     <div class="flex items-center justify-center gap-x-2">
                         <div role="status" v-if="loadbtn">

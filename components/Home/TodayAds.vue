@@ -1,3 +1,43 @@
+
+<script setup>
+
+// Bookmark
+// const bookmarkAdd = async(id,index) => {
+//     const token = useTokenStore();
+//     try{
+//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+//                     method: 'PUT',
+//                     headers: {
+//                         Accept: "application/json",
+//                         Authorization: `Bearer ${token.getToken}`,
+//                     },
+//                 });
+//         if(data){
+//             regularAds.value[index].is_bookmarked = 1;
+//         }
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
+
+// const bookmarkRemove = async(id,index) => {
+//     const token = useTokenStore();
+//     try{
+//         const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${id}`, {
+//                     method: 'DELETE',
+//                     headers: {
+//                         Accept: "application/json",
+//                         Authorization: `Bearer ${token.getToken}`,
+//                     },
+//                 });
+//         if(data){
+//             regularAds.value[index].is_bookmarked = 0;
+//         }
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
+</script>
 <template>
     <div class="mx-auto w-full max-w-screen-2xl px-4 py-2">
         <div class="bg-white">

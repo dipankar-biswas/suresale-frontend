@@ -118,9 +118,10 @@ const CacheType = (type) => {
                             
                             <div v-for="(type,index) in adstype" :key="type.id" class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                                 <div @click="CacheType(type)" class="cursor-pointer flex flex-col items-center px-6 pt-6 pb-8">
-                                    <img class="w-24 h-24 mb-3 rounded-full shadow-lg" :src="useRuntimeConfig().public.imageUrl+'/'+type.image" alt="image"/>
+                                    <img class="w-24 h-24 mb-3 rounded-full shadow-lg" :src="useRuntimeConfig().public.imageUrl+'/'+type?.image" alt="image"/>
                                     <h5 class="mb-1 text-xl text-center font-medium text-gray-900 dark:text-white">
-                                        <h4 class="text-md text-gray-600 capitalize">{{ type.name }}</h4>
+                                        <h4 class="text-md text-gray-700 capitalize mb-2.5">{{ type?.name }}</h4>
+                                        <p class="text-xs text-gray-500">{{ type?.desc }}</p>
                                     </h5>
                                 </div>
                             </div>

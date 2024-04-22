@@ -35,7 +35,7 @@ const form = reactive({
     category: null,
     stock: null,
     location: null,
-    tags: [],
+    // tags: [],
     image: [],
     sku: null,
     currency_id: 12,
@@ -60,7 +60,8 @@ const categoryFields = async() => {
         });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        }
+        if(data){
             fields.value = data.value.data;
             for (let i = 0; i < fields.value.length; i++) {
                 // let fieldName = (fields.value[i].name).toLowerCase().replaceAll(' ','_');
@@ -101,40 +102,41 @@ const removeImage = (index) => {
     galleryData.value = galleryData.value?.filter((item,ind) => ind !== index);
 }
 
-const open = ref(false);
-const allTags = ref([]);
-const todos = ref([]);
-const todoText = ref("");
-const tagKeyUp = async() => {
+// const open = ref(false);
+// const allTags = ref([]);
+// const todos = ref([]);
+// const todoText = ref("");
+// const tagKeyUp = async() => {
     
-    try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/tags?name=${todoText.value}`,{
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token.getToken}`,
-            },
-        });
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
-            allTags.value = data.value;
-        }
-    }catch(error){
-        console.log(error);
-    }
-}
-function addTodo(id,name) {
-    form.tags.push([id]);
-    todos.value.unshift({
-        id: id,
-        text: name,
-    });
-    todoText.value = "";
-    allTags.value = "";
-}
-function removeTodo(index) {
-    todos.value.splice(index, 1);
-}
+//     try{
+//         const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/tags?name=${todoText.value}`,{
+//             headers: {
+//                 Accept: "application/json",
+//                 Authorization: `Bearer ${token.getToken}`,
+//             },
+//         });
+//         if (error.value?.data?.message === 'Unauthenticated.') {
+//             token.removeToken();
+//         } 
+//         if(data){
+//             allTags.value = data.value;
+//         }
+//     }catch(error){
+//         console.log(error);
+//     }
+// }
+// function addTodo(id,name) {
+//     form.tags.push([id]);
+//     todos.value.unshift({
+//         id: id,
+//         text: name,
+//     });
+//     todoText.value = "";
+//     allTags.value = "";
+// }
+// function removeTodo(index) {
+//     todos.value.splice(index, 1);
+// }
 
 
 const categories = ref([]);
@@ -143,13 +145,9 @@ const category_name = ref(null);
 const getCetagories = async() => {
     refreshNuxtData();
     try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
-            categories.value = data.value.data;
-            category_name.value = categories.value.find(item => item?.id == catId.value)?.name;
-        }
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/categories/types/${route.params.type}`);
+        categories.value = data.value.data;
+        category_name.value = categories.value.find(item => item?.id == catId.value)?.name;
     }catch(error){
         console.log(error);
     }
@@ -157,85 +155,94 @@ const getCetagories = async() => {
 getCetagories();
 
 
+const priceValue = ref(null);
+const priceKeyUp = (event) => {    
+    let priceInput = parseFloat(event.target.value?.replace(/[^\d.]/g, '')); // Extracting numbers and decimals only
+    if (!isNaN(priceInput)) { // Checking if it's a valid number
+        let formattedPrice = priceInput.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        priceValue.value = formattedPrice;
+    }
+}
 
 const errors = ref([]);
 const loadbtn = ref(false);
-
 const handelSubmit = async() => {
-    try{
-        const { pending, data, error } = await useFetch('https://maps.googleapis.com/maps/api/geocode/json',{
-            params:{
-                address:form.location,
-                key:'AIzaSyD-0xI794-kqn_h4sK6GJeACrGfDQMBUgk'
-            }
-        })
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
+    if(loadbtn.value == false){
+
+        try{
+            const { pending, data, error } = await useFetch('https://maps.googleapis.com/maps/api/geocode/json',{
+                params:{
+                    address:form.location,
+                    key:'AIzaSyD-0xI794-kqn_h4sK6GJeACrGfDQMBUgk'
+                }
+            })
             form.lat = data.value?.results[0].geometry.location.lat;
             form.lng = data.value?.results[0].geometry.location.lng;
-        }
-
-    }catch(error){
-        console.log(error);
-    }
-
-    loadbtn.value = true;
-    let formdata = new FormData();
-    formdata.append("type_id", route.params.type);
-    formdata.append("title", form.title);
-    formdata.append("price", form.price);
-    formdata.append("negotiable", form.negotiable == true ? 1 : 0);
-    formdata.append("description", form.description);
-    formdata.append("category_id", route.params.id);
-    formdata.append("stock_amount", form.stock);
-    formdata.append("location", form.location);
-    formdata.append("currency_id", form.currency_id);
-    formdata.append("lat", form.lat);
-    formdata.append("lng", form.lng);
-    formdata.append("currency_id", form.currency_id);
-    for (let i = 0; i < form.tags.length; i++) {
-        formdata.append(`tags[]`, form.tags[i]);
-    }
-    for (let i = 0; i < form.image.length; i++) {
-        formdata.append(`image[]`, form.image[i]);
-    }
-    for (let i = 0; i < fields.value.length; i++) {
-        formdata.append(`${fields.value[i].name}`, form.fields.key1[i].value);
-    }
-
+            // AIzaSyBp48QfZkwkbhY30_8Emy25T8iUJjUjDGM
     
-    try{
-        const { data, error } = await $fetch(`${useRuntimeConfig().public.baseUrl}/product`, {
-            method: 'POST',
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token.getToken}`,
-            },
-            body: formdata
-        });
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
-            form.title = null;
-            form.price = null;
-            form.description = null;
-            form.stock = null;
-            form.location = null;
-            form.tags = [];
-            todos.value = [];
-            form.image = [];
-            galleryData.value = [];
-            for (let i = 0; i < fields.value.length; i++) {
-                form.fields.key1[i].value = null;
-            }
-            loadbtn.value = false;
-            toaster.addSuccess(data.message);
+        }catch(error){
+            console.log(error);
         }
-    }catch(error){
-        loadbtn.value = false;
-        errors.value = error.data.errors;
-        toaster.addWrong(error.data?.message);
+    
+        loadbtn.value = true;
+        let formdata = new FormData();
+        formdata.append("type_id", route.params.type);
+        formdata.append("title", form.title);
+        formdata.append("price", form.price);
+        formdata.append("negotiable", form.negotiable == true ? 1 : 0);
+        formdata.append("description", form.description);
+        formdata.append("category_id", route.params.id);
+        formdata.append("stock_amount", form.stock);
+        formdata.append("location", form.location);
+        formdata.append("currency_id", form.currency_id);
+        formdata.append("lat", form.lat);
+        formdata.append("lng", form.lng);
+        formdata.append("currency_id", form.currency_id);
+        // for (let i = 0; i < form.tags.length; i++) {
+        //     formdata.append(`tags[]`, form.tags[i]);
+        // }
+        for (let i = 0; i < form.image.length; i++) {
+            formdata.append(`image[]`, form.image[i]);
+        }
+        for (let i = 0; i < fields.value.length; i++) {
+            formdata.append(`${fields.value[i].name}`, form.fields.key1[i].value);
+        }
+    
+        
+        try{
+            const data = await $fetch(`${useRuntimeConfig().public.baseUrl}/product`, {
+                method: 'POST',
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token.getToken}`,
+                },
+                body: formdata
+            });
+            if(data){
+                toaster.addSuccess(data?.message);
+                loadbtn.value = false;
+                form.title = null;
+                form.price = null;
+                form.description = null;
+                form.stock = null;
+                form.location = null;
+                // form.tags = [];
+                // todos.value = [];
+                form.image = [];
+                galleryData.value = [];
+                for (let i = 0; i < fields.value.length; i++) {
+                    form.fields.key1[i].value = null;
+                }
+            }
+
+            // if (error.value?.data?.message === 'Unauthenticated.') {
+            //     token.removeToken();
+            // }
+        }catch(error){
+            loadbtn.value = false;
+            toaster.addWrong(error.data?.message);
+            errors.value = error.data.errors;
+        }
     }
 }
 
@@ -269,7 +276,7 @@ const imageMouseMove = (e) => {
             <div class="sidebar basis-72">
                 <div>
                     <div class="s-categories bg-gray-100 px-3 py-4 rounded-md">
-                        <nuxt-link to="/user/listings" class="text-sm font-semibold">Back</nuxt-link>
+                        <nuxt-link to="/user/dashboard" class="text-sm font-semibold">Back</nuxt-link>
                         <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700">
                         <h3 class="text-lg font-semibold mb-3">Sell Your Product</h3>
 
@@ -301,7 +308,7 @@ const imageMouseMove = (e) => {
                                 <span v-if="errors.title" class="text-sm text-red-500">{{ errors.title[0] }}</span>
                             </div>
                             <div class="mb-2">
-                                <input type="text" name="price" v-model="form.price" id="default-input" placeholder="Price"
+                                <input type="text" @keyup="priceKeyUp($event)" name="price" v-model="form.price" id="default-input" placeholder="Price"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                 <span v-if="errors.price" class="text-sm text-red-500">{{ errors.price[0] }}</span>
                             </div>
@@ -343,7 +350,7 @@ const imageMouseMove = (e) => {
                                 <span v-if="errors.stock_amount" class="text-sm text-red-500">{{ errors.stock_amount[0] }}</span>
                             </div>
 
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <div class="form-group relative">
                                     <input type="text" 
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -365,7 +372,7 @@ const imageMouseMove = (e) => {
                                     </span>
                                 </div>
                                 <span v-if="errors.tags" class="text-sm text-red-500">{{ errors.tags[0] }}</span>
-                            </div>
+                            </div> -->
 
                             <div class="mb-2">
                                 <input type="text" name="location" v-model="form.location" id="default-input" placeholder="Address"
@@ -378,8 +385,16 @@ const imageMouseMove = (e) => {
                         </div>
 
 
-                        <button type="button" @click="handelSubmit"
-                            class="text-white flex items-center justify-center w-full gap-x-2 mt-5 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Publish</button>
+                        <button type="button" @click="handelSubmit(1)" class="text-white flex items-center justify-center w-full gap-x-2 mt-5 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                            <div role="status" v-if="loadbtn">
+                                <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                                </svg>
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <span>Publish</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -416,7 +431,7 @@ const imageMouseMove = (e) => {
                                     <div class="grid grid-cols-5 gap-4">
                                         <div v-for="(slide,index) in galleryData" :key="index">
                                             <img @click="showImage = slide" class="h-20 w-full max-w-36 object-cover rounded-lg" :src="slide" alt="Image">
-                                            <button @click="removeImage(index)">remove</button>
+                                            <!-- <button @click="removeImage(index)">remove</button> -->
                                         </div>
                                     </div>
                                 </div>
@@ -429,7 +444,7 @@ const imageMouseMove = (e) => {
                                         <span v-else>Title</span>
                                     </h2>
                                     <h4 class="text-lg font-semibold mb-3">
-                                        <span v-if="form.price != null && form.price != ''">Tk.{{ form.price }} <span v-if="form.negotiable != 0 && form.negotiable != ''" class="text-sm font-semibold mb-3">( Negotiable )</span></span>
+                                        <span v-if="form.price != null && form.price != ''">Tk. {{ priceValue }}  <span v-if="form.negotiable != 0 && form.negotiable != ''" class="text-sm font-semibold mb-3">( Negotiable )</span></span>
                                         <span v-else>Ask Price</span>
                                     </h4>
                                     
@@ -438,23 +453,25 @@ const imageMouseMove = (e) => {
                                         <span v-else>Description</span>
                                     </p>
                                     <h3 class="text-xl font-semibold mb-3">Details</h3>
-                                    <p class="text-sm font-normal mb-2">
-                                        <span v-if="category_name != null && category_name != ''" class="font-semibold">Category : </span><span>{{ category_name }}</span>
+                                    <p v-if="category_name != null && category_name != ''" class="text-sm font-normal mb-2">
+                                        <span class="font-semibold">Category : </span><span>{{ category_name }}</span>
                                     </p>
                                     <div v-if="fields.length > 0">
                                         <p v-for="(field,index) in fields" :key="field.name.id" class="text-sm font-normal mb-2">
-                                            <span class="font-semibold">{{ (field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ') }} : </span><span>{{ form.fields.key1[index].value }}</span>
+                                            <span v-if="form.fields.key1[index].value != null && form.fields.key1[index].value != ''">
+                                                <span class="font-semibold">{{ (field.name[0]?.toUpperCase() + field.name?.slice(1))?.replace('_',' ') }} : </span><span>{{ form.fields.key1[index].value }}</span>
+                                            </span>
                                         </p>
                                     </div>
-                                    <p class="text-sm font-normal mb-2">
-                                        <span v-if="form.location != null && form.location != ''" class="font-semibold">Address : </span><span>{{ form.location }}</span>
+                                    <p v-if="form.location != null && form.location != ''" class="text-sm font-normal mb-2">
+                                        <span class="font-semibold">Address : </span><span>{{ form.location }}</span>
                                     </p>
-                                    <div class="location mt-5">
+                                    <!-- <div class="location mt-5">
                                         <h4 class="text-lg font-semibold mb-2">Location</h4>
                                         <div class="map border border-gray-400 rounded-md overflow-hidden">
                                             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.4367733384447!2d90.35431187071461!3d23.767456140979196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c1e5f64e673d%3A0x8a5fc047c1d5198c!2sProjonmo%20Digital%20Ltd!5e0!3m2!1sen!2sbd!4v1707820809326!5m2!1sen!2sbd" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                                         </div>
-                                    </div>
+                                    </div> -->
 
                                     <div class="mt-6">
                                         <h4 class="text-xl font-semibold mb-2">Seller Information</h4>
@@ -465,7 +482,7 @@ const imageMouseMove = (e) => {
                                             </div>
                                             <div class="flex flex-col">
                                                 <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ auth.user?.name }}</h5>
-                                                <span class="text-sm text-gray-500 dark:text-gray-400">Visual Designer</span>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">Since {{ new Date(auth.user?.created_at).toLocaleDateString() }}</span>
                                             </div>
                                         </div>
                                     </div>

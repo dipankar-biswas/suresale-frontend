@@ -11,10 +11,10 @@ onMounted(() => {
 })
 
 useSeoMeta({
-  title: 'Annoucement - My Amazing Site',
-  ogTitle: 'My Amazing Site',
-  description: 'This is my amazing site, let me tell you all about it.',
-  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  title: 'Annoucement - Suresale - A Bangladeshi Local Marketplace',
+  ogTitle: 'Annoucement - Suresale - A Bangladeshi Local Marketplace',
+  description: 'Suresale - A Bangladeshi Local Marketplace',
+  ogDescription: 'Suresale - A Bangladeshi Local Marketplace',
   ogImage: 'image',
   twitterCard: 'image',
 })

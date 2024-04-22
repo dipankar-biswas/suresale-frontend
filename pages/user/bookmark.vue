@@ -11,16 +11,17 @@ onMounted(() => {
 })
 
 useSeoMeta({
-  title: 'Bookmark Products - My Amazing Site',
-  ogTitle: 'My Amazing Site',
-  description: 'This is my amazing site, let me tell you all about it.',
-  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  title: 'Bookmark Products - Suresale - A Bangladeshi Local Marketplace',
+  ogTitle: 'Bookmark Products - Suresale - A Bangladeshi Local Marketplace',
+  description: 'Suresale - A Bangladeshi Local Marketplace',
+  ogDescription: 'Suresale - A Bangladeshi Local Marketplace',
   ogImage: 'image',
   twitterCard: 'image',
 })
 
 const token = useTokenStore();
 const datetime = useDateTime();
+const toaster = useToasterStore();
 
 const listgrid = ref(1);
 
@@ -41,9 +42,11 @@ const MyBookmarks = async() => {
             token.removeToken();
         } else {
             bookmarks.value = data.value.data;
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 MyBookmarks();
@@ -63,9 +66,11 @@ const bookmarkRemove = async(id,index) => {
             token.removeToken();
         } else {
             MyBookmarks();
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 

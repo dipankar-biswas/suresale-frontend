@@ -1,6 +1,8 @@
 <script setup>
 const auth = useAuthStore();
 const route = useRoute();
+const toaster = useToasterStore();
+
 const props = defineProps(['chathideshow','toUser','getmessage','chatslistlastid']);
 const emit = defineEmits(['chathide','loadmoremsgid']);
 
@@ -44,7 +46,8 @@ const handelSubmit = async() => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        } 
+        if(data){
             loadbtn.value = false;
             msgid.value = props.getmessage[props.getmessage.length - 1].id + 1;
             let newChatMsg = '';
@@ -62,10 +65,12 @@ const handelSubmit = async() => {
                         </div>`;
             chats.innerHTML= chats.innerHTML + newChatMsg;
             form.message = '';
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         loadbtn.value = false;
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 

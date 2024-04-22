@@ -11,10 +11,10 @@ onMounted(() => {
 })
 
 useSeoMeta({
-  title: 'Login - My Amazing Site',
-  ogTitle: 'My Amazing Site',
-  description: 'This is my amazing site, let me tell you all about it.',
-  ogDescription: 'This is my amazing site, let me tell you all about it.',
+  title: 'Login - Suresale - A Bangladeshi Local Marketplace',
+  ogTitle: 'Login - Suresale - A Bangladeshi Local Marketplace',
+  description: 'Suresale - A Bangladeshi Local Marketplace',
+  ogDescription: 'Suresale - A Bangladeshi Local Marketplace',
   ogImage: 'image',
   twitterCard: 'image',
 })
@@ -22,8 +22,8 @@ useSeoMeta({
 const toaster = useToasterStore();
 const auth = useAuthStore();
 const form = reactive({
-    email: 'test@example.com',
-    password: 'password',
+    email: null,
+    password: null,
 })
 const errors = ref([]);
 const loadbtn = ref(false);

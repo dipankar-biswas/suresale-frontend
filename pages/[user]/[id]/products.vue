@@ -17,6 +17,8 @@ const auth = useAuthStore();
 const route = useRoute();
 const datetime = useDateTime();
 const common = useCommonFun();
+const toaster = useToasterStore();
+
 const listgrid = ref(2);
 
 const follower = ref(0);
@@ -33,7 +35,8 @@ const followers = async() => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        }
+        if(data){
             followersData.value = data.value.data;
             follower.value = followersData.value.length;
         }
@@ -49,15 +52,13 @@ const followings = async() => {
     refreshNuxtData();
     const token = useTokenStore();
     try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
+        const { pending, data } = await useFetch(`${useRuntimeConfig().public.baseUrl}/followings`, {
                     headers: {
                         Accept: "application/json",
                         Authorization: `Bearer ${token.getToken}`,
                     },
                 });
-        if (error.value?.data?.message === 'Unauthenticated.') {
-            token.removeToken();
-        } else {
+        if(data){
             followingsData.value = data.value.data;
             following.value = followingsData.value.find(item => item?.pivot?.follower_id === auth.user.id).id > 0 ? true : false;
         }
@@ -82,11 +83,14 @@ const follow = async() => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        } 
+        if(data){
             following.value = true;
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 
@@ -102,11 +106,14 @@ const unfollow = async() => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        } 
+        if(data){
             following.value = false;
+            toaster.addSuccess(data.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 
@@ -126,7 +133,8 @@ const AllAds = async() => {
         });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        }
+        if(data){
             allAds.value = data.value;
             allAdsList.value = data.value?.product?.data;
         }
@@ -167,11 +175,14 @@ const bookmarkAdd = async(id,index) => {
                 });
             if (error.value?.data?.message === 'Unauthenticated.') {
                 token.removeToken();
-            } else {
+            } 
+            if(data){
                 allAdsList.value[index].is_bookmarked = 1;
+                toaster.addSuccess(data.message);
             }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 
@@ -187,11 +198,14 @@ const bookmarkRemove = async(id,index) => {
                 });
             if (error.value?.data?.message === 'Unauthenticated.') {
                 token.removeToken();
-            } else {
+            } 
+            if(data){
                 allAdsList.value[index].is_bookmarked = 0;
+                toaster.addSuccess(data.message);
             }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 </script>
@@ -267,7 +281,7 @@ const bookmarkRemove = async(id,index) => {
                     <div v-if="allAdsList?.length > 0" class="adses rounded grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-5" :class="[ listgrid == 2 ? 'grid' : 'flex flex-col' ]">
                         <div v-for="(ads,index) in allAdsList" :key="ads.id" class="max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-105 dark:bg-gray-800 dark:border-gray-700" :class="[ listgrid == 2 ? '' : 'flex' ]">
                             <div class="relative">
-                                <nuxt-link :to="`/ads-details/${ads.id}`">
+                                <nuxt-link :to="`/ads-details/${ads?.category?.slug}/${common.convertToSlug(ads?.title)}/${ads?.id}`">
                                     <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-if="ads.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+ads?.picture[0]?.replaceAll('public','storage')" alt="Ads" />
                                     <img class="rounded-t-lg w-full h-48 object-cover" :class="[ listgrid == 1 ? 'w-72 rounded-s-md' : 'w-full rounded-t-md' ]" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
                                 </nuxt-link>
@@ -275,11 +289,11 @@ const bookmarkRemove = async(id,index) => {
                             <div class="px-5 py-3" :class="[ listgrid == 1 ? 'w-[calc(100% - 18rem)]' : 'w-full' ]">
                                 <div class="flex justify-between">
                                     <div class="left flex gap-x-3">
-                                        <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ ads.currency?.symbol }}{{ ads.price }}</h3>
+                                        <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ ads.currency?.symbol }}{{ common.formatPrice(ads.price) }}</h3>
                                     </div>
                                 </div>
                                 <h4 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                    <nuxt-link :to="`/ads-details/${ads?.id}`">
+                                    <nuxt-link :to="`/ads-details/${ads?.category?.slug}/${common.convertToSlug(ads?.title)}/${ads?.id}`">
                                         {{ ads.title }}
                                     </nuxt-link>
                                 </h4>

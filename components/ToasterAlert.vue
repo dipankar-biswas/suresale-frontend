@@ -5,7 +5,7 @@ const toaster = useToasterStore();
 <template>
     <div class="fixed top-16 right-3 z-40">
         <div v-if="toaster.info.length > 0">
-            <div v-for="(item,index) in info.wrong" :key="index">
+            <div v-for="(item,index) in toaster.info" :key="index">
                 <div v-if="toaster.info[index]" id="toast-info" class="flex items-center w-full max-w-xs p-4 mb-3 text-gray-500 bg-blue-500 rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
                     <div class="inline-flex items-center justify-center flex-shrink-0 text-white rounded-lg dark:bg-green-800 dark:text-green-200">
                         <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">

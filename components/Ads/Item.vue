@@ -3,6 +3,7 @@ const props = defineProps(['adsItem']);
 const auth = useAuthStore();
 const datetime = useDateTime();
 const common = useCommonFun();
+const toaster = useToasterStore();
 
 
 
@@ -10,7 +11,7 @@ const common = useCommonFun();
 const bookmarkAdd = async(product) => {
     const token = useTokenStore();
     try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+        const { data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
                     method: 'PUT',
                     headers: {
                         Accept: "application/json",
@@ -19,19 +20,21 @@ const bookmarkAdd = async(product) => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-            console.log('SDFie');
-        } else {
+        } 
+        if(data){
             product.is_bookmarked = 1;
+            toaster.addSuccess(data.value.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 
 const bookmarkRemove = async(product) => {
     const token = useTokenStore();
     try{
-        const { pending, data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
+        const { data, error } = await useFetch(`${useRuntimeConfig().public.baseUrl}/bookmark/${product?.id}`, {
                     method: 'DELETE',
                     headers: {
                         Accept: "application/json",
@@ -40,11 +43,14 @@ const bookmarkRemove = async(product) => {
                 });
         if (error.value?.data?.message === 'Unauthenticated.') {
             token.removeToken();
-        } else {
+        }
+        if(data){
             product.is_bookmarked = 0;
+            toaster.addSuccess(data.value.message);
         }
     }catch(error){
         console.log(error);
+        toaster.addWrong(error.data?.message);
     }
 }
 </script>
@@ -52,7 +58,7 @@ const bookmarkRemove = async(product) => {
 <template>
     <div v-if="props.adsItem" class="max-w-full bg-white border border-gray-200 rounded-lg shadow ease-in-out duration-300 hover:shadow-lg hover:scale-105 dark:bg-gray-800 dark:border-gray-700">
         <div class="relative">
-            <nuxt-link :to="`/ads-details/${props.adsItem?.id}`">
+            <nuxt-link :to="`/ads-details/${props.adsItem?.category?.slug}/${common.convertToSlug(props.adsItem?.title)}/${props.adsItem?.id}`">
                 <img class="rounded-t-lg w-full h-48 object-cover" v-if="props.adsItem?.picture != ''" :src="useRuntimeConfig().public.imageUrl+'/'+props.adsItem?.picture[0].replaceAll('public','storage')" alt="Ads" />
                 <img class="rounded-t-lg w-full h-48 object-cover" v-else src="assets/images/dummy-image.jpg" alt="Ads" />
             </nuxt-link>
@@ -61,7 +67,7 @@ const bookmarkRemove = async(product) => {
         <div class="p-5">
             <div class="flex justify-between">
                 <div class="left flex gap-x-3">
-                    <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ props.adsItem?.currency?.symbol }}{{ props.adsItem?.price }}</h3>
+                    <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ props.adsItem?.currency?.symbol }} {{ common.formatPrice(props.adsItem?.price) }}</h3>
                     <!-- <h5 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">$11,300.00</h5> -->
                 </div>
                 <!-- <div class="right">
@@ -69,7 +75,7 @@ const bookmarkRemove = async(product) => {
                 </div> -->
             </div>
             <h4 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
-                <nuxt-link :to="`/ads-details/${props.adsItem?.id}`">
+                <nuxt-link :to="`/ads-details/${props.adsItem?.category?.slug}/${common.convertToSlug(props.adsItem?.title)}/${props.adsItem?.id}`">
                     {{ props.adsItem?.title }}
                 </nuxt-link>
             </h4>
@@ -80,7 +86,7 @@ const bookmarkRemove = async(product) => {
 
             <div class="flex justify-between">
                 <p class="text-sm">
-                    <nuxt-link :to="`${props.adsItem?.user?.name.replaceAll(' ','-')}/${props.adsItem?.user?.id}/products`">{{ props.adsItem?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(props.adsItem?.created_at) }}
+                    <nuxt-link :to="`/${props.adsItem?.user?.name.replaceAll(' ','-')}/${props.adsItem?.user?.id}/products`">{{ props.adsItem?.user?.name }}</nuxt-link>, {{ datetime.formatCompat(props.adsItem?.created_at) }}
                 </p>
                 <div v-if="auth?.user?.id != props.adsItem?.user_id">
                     <svg v-if="props.adsItem?.is_bookmarked == 1" @click="bookmarkRemove(props.adsItem)" class="w-6 h-6 text-green-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
